@@ -9,6 +9,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const { MongoStore } = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -24,7 +25,7 @@ const dashboardRouter = require("./routes/dashboard.js");
 const userRouter = require("./routes/user.js");
 const homeController = require("./controllers/home.js");
 
-const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/PeakShift";
+const dbUrl = process.env.ATLAS_URL;
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -34,14 +35,27 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 async function main() {
-  await mongoose.connect(MONGO_URL);
+  await mongoose.connect(dbUrl);
 }
 main()
   .then(() => console.log("connected to PeakShift DB"))
   .catch((err) => console.log("DB connection error:", err));
 
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  touchAfter: 24 * 60 * 60, // time in seconds
+  crypto: {
+    secret: process.env.SESSION_SECRET,
+  },
+});
+
+store.on("error", function (e) {
+  console.log("SESSION STORE ERROR", e);
+});
+
 const sessionOptions = {
-  secret: process.env.SESSION_SECRET || "thisshouldbeabettersecret!",
+  store,
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -73,7 +87,7 @@ app.use("/", bookingRouter);
 app.use("/", dashboardRouter);
 app.use("/", userRouter);
 
-app.all("*splat", (req, res, next) => {
+app.all("/*splat", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
 });
 
