@@ -6,7 +6,7 @@ const sampleData = require("../init/data.js");
 
 module.exports.index = async (req, res) => {
   const { q, minPrice, maxPrice, country, page = 1 } = req.query;
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 6;
 
   let filter = { deleted: false };
 
