@@ -6,7 +6,7 @@ async function geocodeLocation(query) {
   const response = await fetch(url, {
     headers: {
       // Nominatim's usage policy requires a real User-Agent identifying your app
-      "User-Agent": "ApnaStay/1.0 (learning project)",
+      "User-Agent": "PeakShift/1.0",
     },
   });
 
