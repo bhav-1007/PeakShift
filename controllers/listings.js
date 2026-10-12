@@ -60,12 +60,15 @@ module.exports.renderNewForm = (req, res) => {
 };
 
 module.exports.createListing = async (req, res) => {
-  let url = req.file.path;
-  let filename = req.file.filename;
   normalizeShiftFields(req.body.listing);
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
-  newListing.image = { url, filename };
+
+  if (req.file) {
+    newListing.image = { url: req.file.path, filename: req.file.filename };
+  } else {
+    newListing.image = { url: "/images/placeholder.svg", filename: "" };
+  }
 
   // Prefer exact coordinates from the autocomplete selection —
   // more reliable than re-geocoding free text, and avoids a second

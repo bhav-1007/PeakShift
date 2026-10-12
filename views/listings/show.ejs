@@ -5,7 +5,7 @@
 
         <div class="show-left">
             <img class="show-image"
-                src="<%= listing.image.url %>"
+                src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>"
                 alt="<%= listing.title %>"
             >
 

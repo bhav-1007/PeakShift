@@ -54,7 +54,7 @@
   <div class="pw-featured-grid">
     <% featuredListings.forEach(listing => { %>
       <a class="pw-card pw-featured-card" href="/listings/<%= listing._id %>">
-        <img class="pw-featured-image" src="<%= listing.image.url %>" alt="<%= listing.title %>">
+        <img class="pw-featured-image" src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>" alt="<%= listing.title %>">
         <div class="pw-featured-info">
           <h3 class="pw-featured-title"><%= listing.title %></h3>
           <p class="pw-featured-location"><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></p>

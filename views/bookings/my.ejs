@@ -12,9 +12,9 @@
     <div class="booking-list">
         <% bookings.forEach(booking => { %>
             <article class="booking-card">
-                <% if (booking.listing && booking.listing.image && booking.listing.image.url) { %>
+                <% if (booking.listing) { %>
                     <a href="/listings/<%= booking.listing._id %>">
-                        <img src="<%= booking.listing.image.url %>" alt="<%= booking.listing.title %>">
+                        <img src="<%= (booking.listing.image && booking.listing.image.url) ? booking.listing.image.url : '/images/placeholder.svg' %>" alt="<%= booking.listing.title %>">
                     </a>
                 <% } %>
                 <div class="booking-card-body">
