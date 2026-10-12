@@ -2,7 +2,7 @@ const Listing = require("../models/listing.js");
 
 module.exports.renderHome = async (req, res, next) => {
   let featuredListings = [];
-  let stats = { openShifts: 0, avgPay: 0, cities: 0 };
+  let stats = { openShifts: 0, avgPay: 0 };
   let topReviews = [];
 
   try {
@@ -18,9 +18,7 @@ module.exports.renderHome = async (req, res, next) => {
     ]);
     const avgPay = payAgg.length > 0 ? Math.round(payAgg[0].avgPay) : 0;
 
-    const cities = await Listing.distinct("location", { deleted: false });
-
-    stats = { openShifts, avgPay, cities: cities.length };
+    stats = { openShifts, avgPay };
 
     // Pull real reviews across all shifts, surface the highest-rated ones
     const listingsWithReviews = await Listing.find({ deleted: false }).populate("reviews");
