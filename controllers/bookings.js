@@ -96,6 +96,16 @@ module.exports.myBookings = async (req, res) => {
 
 module.exports.cancelBooking = async (req, res) => {
   const booking = await Booking.findById(req.params.bookingId);
+  if (!booking) {
+    req.flash("error", "Booking not found.");
+    return res.redirect("/bookings/my");
+  }
+
+  if (booking.status !== "confirmed") {
+    req.flash("error", "Only confirmed shifts can be cancelled.");
+    return res.redirect("/bookings/my");
+  }
+
   booking.status = "cancelled";
   await booking.save();
 
