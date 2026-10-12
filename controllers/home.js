@@ -1,7 +1,6 @@
 const Listing = require("../models/listing.js");
-const sampleData = require("../init/data.js");
 
-module.exports.renderHome = async (req, res) => {
+module.exports.renderHome = async (req, res, next) => {
   let featuredListings = [];
   let stats = { openShifts: 0, avgPay: 0, cities: 0 };
   let topReviews = [];
@@ -41,12 +40,7 @@ module.exports.renderHome = async (req, res) => {
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 3);
   } catch (err) {
-    featuredListings = sampleData.data.slice(0, 4).map((listing, index) => ({
-      ...listing,
-      _id: `demo-${index + 1}`,
-    }));
-    stats = { openShifts: sampleData.data.length, avgPay: 150, cities: 6 };
-    topReviews = [];
+    return next(err);
   }
 
   res.render("home.ejs", { featuredListings, stats, topReviews });

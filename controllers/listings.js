@@ -2,10 +2,9 @@ const Listing = require("../models/listing.js");
 const User = require("../models/user.js");
 const { cloudinary } = require("../cloudConfig.js");
 const geocodeLocation = require("../utils/geocode.js");
-const sampleData = require("../init/data.js");
 const escapeRegex = require("../utils/escapeRegex.js");
 
-module.exports.index = async (req, res) => {
+module.exports.index = async (req, res, next) => {
   const { q, minPrice, maxPrice, country, page = 1 } = req.query;
   const PAGE_SIZE = 6;
 
@@ -42,12 +41,7 @@ module.exports.index = async (req, res) => {
       .skip((currentPage - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE);
   } catch (err) {
-    allListings = sampleData.data.map((listing, index) => ({
-      ...listing,
-      _id: `demo-${index + 1}`,
-    }));
-    totalCount = allListings.length;
-    totalPages = 1;
+    return next(err);
   }
 
   res.render("listings/index.ejs", {
@@ -250,28 +244,6 @@ module.exports.permanentDestroy = async (req, res) => {
 
 module.exports.showListing = async (req, res) => {
   let { id } = req.params;
-  if (id.startsWith("demo-")) {
-    const index = Number(id.replace("demo-", "")) - 1;
-    const demoListing = sampleData.data[index];
-    if (!demoListing) {
-      req.flash("error", "Shift request does not exist!");
-      return res.redirect("/listings");
-    }
-    return res.render("listings/show.ejs", {
-      listing: {
-        ...demoListing,
-        _id: id,
-        reviews: [],
-        owner: {
-          username: "PeakShift Demo Business",
-          email: "business@peakshift.demo",
-          _id: { equals: () => false },
-        },
-        deleted: false,
-      },
-      isWishlisted: false,
-    });
-  }
 
   const listing = await Listing.findById(id).populate("reviews").populate("owner");
   if (!listing) {
