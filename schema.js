@@ -31,3 +31,20 @@ module.exports.reviewSchema = Joi.object({
         comment: Joi.string().required(),
     }).required(),
 });
+
+module.exports.userSchema = Joi.object({
+    username: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    role: Joi.string().valid("worker", "business").required(),
+    phone: Joi.string().allow("").optional(),
+    businessName: Joi.when("role", {
+        is: "business",
+        then: Joi.string().required(),
+        otherwise: Joi.string().allow("").optional(),
+    }),
+    skills: Joi.alternatives().try(
+        Joi.array().items(Joi.string().allow("")),
+        Joi.string().allow("")
+    ).optional(),
+});

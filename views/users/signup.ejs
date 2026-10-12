@@ -3,19 +3,78 @@
 <div class="form-panel">
   <h1>Sign Up</h1>
   <p class="muted">Create a PeakShift account to post shifts or accept nearby work.</p>
+
   <form action="/users" method="POST">
+    <div class="form-group">
+      <label class="form-label d-block fw-bold" style="margin-bottom:8px;">I am joining PeakShift because:</label>
+      <div style="display:flex; gap:12px; margin-bottom:12px;">
+        <label id="labelWorker" style="flex:1; border:2px solid var(--line); border-radius:var(--radius); padding:12px; cursor:pointer; text-align:center;">
+          <input type="radio" name="role" id="roleWorker" value="worker" checked style="margin-right:6px;">
+          <strong>I want shifts</strong>
+          <span class="muted d-block small" style="margin-top:4px;">Find flexible hourly shifts</span>
+        </label>
+        <label id="labelBusiness" style="flex:1; border:2px solid var(--line); border-radius:var(--radius); padding:12px; cursor:pointer; text-align:center;">
+          <input type="radio" name="role" id="roleBusiness" value="business" style="margin-right:6px;">
+          <strong>I need workers</strong>
+          <span class="muted d-block small" style="margin-top:4px;">Hire helpers for rushes</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group" id="businessNameGroup" style="display:none;">
+      <label for="businessName">Business Name</label>
+      <input type="text" id="businessName" name="businessName" placeholder="e.g. Indiranagar Kitchen">
+    </div>
+
     <div class="form-group">
       <label for="username">Username</label>
       <input type="text" id="username" name="username" required>
     </div>
+
     <div class="form-group">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" required>
     </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number (optional)</label>
+      <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210">
+    </div>
+
+    <div class="form-group" id="skillsGroup">
+      <label for="skills">Skills (optional)</label>
+      <input type="text" id="skills" name="skills" placeholder="e.g. packing, POS, cleaning">
+    </div>
+
     <div class="form-group">
       <label for="password">Password</label>
       <input type="password" id="password" name="password" required>
     </div>
+
     <button type="submit" class="btn">Sign Up</button>
   </form>
 </div>
+
+<script>
+  const roleWorker = document.getElementById('roleWorker');
+  const roleBusiness = document.getElementById('roleBusiness');
+  const businessNameGroup = document.getElementById('businessNameGroup');
+  const businessNameInput = document.getElementById('businessName');
+  const skillsGroup = document.getElementById('skillsGroup');
+
+  function toggleRoleFields() {
+    if (roleBusiness.checked) {
+      businessNameGroup.style.display = 'block';
+      businessNameInput.setAttribute('required', 'required');
+      if (skillsGroup) skillsGroup.style.display = 'none';
+    } else {
+      businessNameGroup.style.display = 'none';
+      businessNameInput.removeAttribute('required');
+      if (skillsGroup) skillsGroup.style.display = 'block';
+    }
+  }
+
+  roleWorker.addEventListener('change', toggleRoleFields);
+  roleBusiness.addEventListener('change', toggleRoleFields);
+  toggleRoleFields();
+</script>

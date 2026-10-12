@@ -28,6 +28,11 @@ module.exports.createBooking = async (req, res) => {
     return res.redirect(`/listings/${id}`);
   }
 
+  if (req.user.role !== "worker") {
+    req.flash("error", "Only workers can accept shift requests.");
+    return res.redirect(`/listings/${id}`);
+  }
+
   const checkIn = parseDateTime(req.body.startAt || req.body.checkIn);
   const checkOut = parseDateTime(req.body.endAt || req.body.checkOut);
 

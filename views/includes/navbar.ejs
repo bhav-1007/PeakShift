@@ -17,9 +17,12 @@
         <li class="nav-item">
           <a class="nav-link" href="/listings">Open Shifts</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/listings/new">Post Shift</a>
-        </li>
+
+        <% if (!currentUser || currentUser.role === 'business') { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/listings/new">Post Shift</a>
+          </li>
+        <% } %>
 
         <% if (currentUser) { %>
           <li class="nav-item dropdown">
@@ -28,11 +31,14 @@
               <span><%= currentUser.username %></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-              <li><a class="dropdown-item" href="/listings/my"><i class="fa-solid fa-list me-2"></i>My Shift Requests</a></li>
-              <li><a class="dropdown-item" href="/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="/bookings/my"><i class="fa-solid fa-calendar-check me-2"></i>My Shifts</a></li>
+              <% if (currentUser.role === 'business') { %>
+                <li><a class="dropdown-item" href="/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a></li>
+                <li><a class="dropdown-item" href="/listings/my"><i class="fa-solid fa-list me-2"></i>My Shift Requests</a></li>
+                <li><a class="dropdown-item" href="/listings/trash"><i class="fa-solid fa-box-archive me-2"></i>Archive</a></li>
+              <% } else if (currentUser.role === 'worker') { %>
+                <li><a class="dropdown-item" href="/bookings/my"><i class="fa-solid fa-calendar-check me-2"></i>My Shifts</a></li>
+              <% } %>
               <li><a class="dropdown-item" href="/listings/wishlist"><i class="fa-solid fa-heart me-2"></i>Watchlist</a></li>
-              <li><a class="dropdown-item" href="/listings/trash"><i class="fa-solid fa-box-archive me-2"></i>Archive</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
             </ul>

@@ -13,6 +13,23 @@ const UserSchema = new Schema({
     required: true,
     unique: true,
   },
+  role: {
+    type: String,
+    enum: ["worker", "business"],
+    required: true,
+  },
+  phone: {
+    type: String,
+    default: "",
+  },
+  businessName: {
+    type: String,
+    default: "",
+  },
+  skills: {
+    type: [String],
+    default: [],
+  },
   isAdmin: {
     type: Boolean,
     default: false,

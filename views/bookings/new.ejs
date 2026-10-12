@@ -6,8 +6,8 @@
 
     <% if (!currentUser) { %>
         <a class="btn" href="/login">Login to Accept</a>
-    <% } else if (listing.owner && listing.owner._id.equals(currentUser._id)) { %>
-        <p class="muted">This is your shift request, so workers will see acceptance options here.</p>
+    <% } else if (currentUser.role === 'business') { %>
+        <p class="muted">Business accounts cannot accept shifts. Sign in with a worker account to apply.</p>
     <% } else { %>
         <form method="POST" action="/listings/<%= listing._id %>/bookings" class="booking-form">
             <div class="booking-date-grid">
