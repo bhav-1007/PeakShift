@@ -17,12 +17,18 @@ const LocalStrategy = require("passport-local");
 const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 const User = require("./models/user.js");
+const Listing = require("./models/listing.js");
+const Booking = require("./models/booking.js");
+const { recomputeUserTrust } = require("./utils/trust.js");
 
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const bookingRouter = require("./routes/booking.js");
 const dashboardRouter = require("./routes/dashboard.js");
 const userRouter = require("./routes/user.js");
+const earningsRouter = require("./routes/earnings.js");
+const notificationRouter = require("./routes/notification.js");
+const { notify } = require("./utils/notifications.js");
 const homeController = require("./controllers/home.js");
 
 const dbUrl = process.env.ATLAS_URL;
@@ -73,19 +79,61 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+const timeHelpers = require("./utils/time.js");
+
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currentUser = req.user;
+  res.locals.timeHelpers = timeHelpers;
   next();
 });
 
+// Periodic sweep: expire past open shifts and mark un-checked-in bookings as no_show
+async function periodicSweep() {
+  try {
+    const now = new Date();
+    // 1. Expire open shifts past startAt
+    await Listing.updateMany(
+      { status: "open", startAt: { $lte: now } },
+      { $set: { status: "expired" } }
+    );
+
+    // 2. "accepted" bookings with no check-in 30 minutes after start become "no_show"
+    const noShowCutoff = new Date(now.getTime() - 30 * 60 * 1000);
+    const noShowBookings = await Booking.find({
+      status: "accepted",
+      startAt: { $lte: noShowCutoff },
+    });
+    if (noShowBookings.length > 0) {
+      await Booking.updateMany(
+        { _id: { $in: noShowBookings.map((b) => b._id) } },
+        { $set: { status: "no_show" } }
+      );
+      for (const b of noShowBookings) {
+        await recomputeUserTrust(b.worker);
+        await notify(
+          b.worker,
+          "You were marked as no-show for a shift due to missed check-in",
+          "/bookings/my"
+        );
+      }
+    }
+  } catch (err) {
+    console.error("Periodic sweep error:", err);
+  }
+}
+setInterval(periodicSweep, 5 * 60 * 1000);
+periodicSweep();
+
 app.get("/", wrapAsync(homeController.renderHome));
 app.use("/listings", listingRouter);
-app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", reviewRouter);
 app.use("/", bookingRouter);
 app.use("/", dashboardRouter);
 app.use("/", userRouter);
+app.use("/", earningsRouter);
+app.use("/", notificationRouter);
 
 app.all("/*splat", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));

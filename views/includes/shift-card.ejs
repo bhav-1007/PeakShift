@@ -1,0 +1,92 @@
+<li class="shift-row">
+    <div class="shift-row-main">
+        <div class="shift-row-top">
+            <span class="shift-role-badge">
+                <i class="fa-solid fa-briefcase text-primary me-1"></i><%= listing.roleType || "Peak-hour helper" %>
+            </span>
+            <span class="shift-time-pill">
+                <i class="fa-regular fa-clock me-1 text-primary"></i><%= timeHelpers.formatStartsIn(listing.startAt) %>
+            </span>
+            <% if (listing.distanceKm != null) { %>
+                <span class="shift-dist-pill">
+                    <i class="fa-solid fa-location-arrow me-1 text-primary"></i><%= listing.distanceKm %> km away
+                </span>
+            <% } %>
+            <% if (listing.status && listing.status !== 'open') { %>
+                <%- include('./status-badge', { status: listing.status }) %>
+            <% } %>
+        </div>
+
+        <h2 class="shift-row-title">
+            <a href="/listings/<%= listing._id %>"><%= listing.title %></a>
+        </h2>
+
+        <div class="shift-row-meta">
+            <span class="shift-meta-item">
+                <i class="fa-regular fa-calendar-check text-primary me-1"></i>
+                <%= timeHelpers.formatShiftRangeIST(listing.startAt, listing.endAt) %>
+            </span>
+            <span class="shift-meta-item">
+                <i class="fa-solid fa-location-dot text-primary me-1"></i>
+                <%= listing.location %>
+            </span>
+        </div>
+
+        <p class="shift-row-desc"><%= listing.description %></p>
+
+        <% if (listing.skillTags && listing.skillTags.length > 0) { %>
+            <div class="shift-row-tags">
+                <% listing.skillTags.forEach(tag => { %>
+                    <span class="tag-pill"><i class="fa-solid fa-tag me-1 text-primary"></i><%= tag %></span>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="shift-row-aside">
+        <!-- Staffing Capacity Meter -->
+        <div class="shift-capacity-box">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="shift-capacity-label">
+                    <i class="fa-solid fa-users text-primary me-1"></i>Staffing
+                </span>
+                <strong class="shift-capacity-numbers"><%= listing.filledCount %> / <%= listing.workersNeeded %> filled</strong>
+            </div>
+            <div class="shift-progress-track">
+                <div 
+                    class="shift-progress-bar <%= (listing.filledCount >= listing.workersNeeded) ? 'bg-secondary' : 'bg-primary' %>" 
+                    style="width: <%= Math.min(100, Math.round((listing.filledCount / (listing.workersNeeded || 1)) * 100)) %>%;"
+                ></div>
+            </div>
+            <div class="text-end mt-1">
+                <% if (listing.filledCount >= listing.workersNeeded) { %>
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:0.72rem;">Filled</span>
+                <% } else { %>
+                    <span class="badge bg-success-subtle text-success-emphasis" style="font-size:0.72rem;">
+                        <%= listing.workersNeeded - listing.filledCount %> slot<%= (listing.workersNeeded - listing.filledCount) !== 1 ? 's' : '' %> left
+                    </span>
+                <% } %>
+            </div>
+        </div>
+
+        <%
+            const hours = timeHelpers.calculateHours(listing.startAt, listing.endAt);
+            const totalPay = hours * listing.price;
+        %>
+        <!-- Pay Column -->
+        <div class="shift-pay-box">
+            <div class="shift-rate">
+                <span class="rate-amount">&#8377; <%= listing.price.toLocaleString('en-IN') %></span>
+                <span class="rate-unit">/ hr</span>
+            </div>
+            <div class="shift-total-pay text-muted">
+                &#8377; <%= totalPay.toLocaleString('en-IN') %> total (<%= hours %> hrs)
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <a class="btn btn-primary shift-row-btn" href="/listings/<%= listing._id %>">
+            View Shift <i class="fa-solid fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+</li>

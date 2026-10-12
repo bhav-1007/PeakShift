@@ -8,21 +8,17 @@
 </div>
 
 <% if (wishlistListings.length > 0) { %>
-    <ul class="listing-grid">
+    <ul class="shift-list">
         <% wishlistListings.forEach(listing => { %>
-            <li class="listing-card">
-                <a href="/listings/<%= listing._id %>">
-                    <img src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>" alt="<%= listing.title %>">
-                </a>
-                <div class="listing-card-body">
-                    <h2><a href="/listings/<%= listing._id %>"><%= listing.title %></a></h2>
-                    <p><%= listing.description %></p>
-                    <p class="price">&#8377; <%= listing.price.toLocaleString('en-IN') %> / hour</p>
-                </div>
-            </li>
+            <%- include('../includes/shift-card', { listing, timeHelpers }) %>
         <% }) %>
     </ul>
 <% } else { %>
-    <p class="muted">Your watchlist is empty. Browse shifts and tap the heart to save them here.</p>
-    <a class="btn" href="/listings">Browse shifts</a>
+    <%- include('../includes/empty-state', {
+        icon: 'fa-regular fa-heart',
+        title: 'Your watchlist is empty',
+        message: 'You have not saved any shifts to your watchlist yet. Browse open shifts and click the heart icon to save them here.',
+        actionText: 'Browse open shifts',
+        actionLink: '/listings'
+    }) %>
 <% } %>

@@ -1,0 +1,159 @@
+<% layout('layouts/boilerplate') %>
+
+  <section class="form-shell">
+    <div class="form-card" style="max-width: 650px;">
+      <div class="page-heading mb-4">
+        <div class="page-heading-header">
+          <div>
+            <h1>Worker Profile & Proximity Radar</h1>
+            <p class="muted mb-0">Manage your personal details and set your home location for shift proximity recommendations.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4"
+        style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px;">
+        <h3 style="margin-bottom: 12px; font-size: 1.15rem;"><i class="fa-solid fa-id-card me-2"></i>Account Details
+        </h3>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Username</p>
+            <p class="fw-bold mb-2">@<%= user.username %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Email</p>
+            <p class="fw-bold mb-2">
+              <%= user.email %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Phone</p>
+            <p class="fw-bold mb-2">
+              <%= user.phone || "Not provided" %>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Skills</p>
+            <div>
+              <% if (user.skills && user.skills.length> 0) { %>
+                <% user.skills.forEach(skill=> { %>
+                  <span class="badge bg-light text-dark border me-1">
+                    <%= skill %>
+                  </span>
+                  <% }) %>
+                    <% } else { %>
+                      <span class="text-muted small">None added</span>
+                      <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form method="POST" action="/profile" class="row g-3">
+        <div class="col-12">
+          <h3 style="margin-bottom: 8px; font-size: 1.15rem;"><i class="fa-solid fa-house-chimney me-2"></i>Home
+            Location</h3>
+          <p class="muted small mb-3">Your saved home location is used when you search for "Near me" shifts or when
+            device GPS is unavailable.</p>
+
+          <label class="form-label" for="location-search">Search Home Address / Neighborhood</label>
+          <div class="location-autocomplete">
+            <input class="form-control" id="location-search" type="text" placeholder="e.g. Koramangala, Bengaluru"
+              value="<%= user.homeLocation || '' %>" autocomplete="off" required>
+            <div id="suggestions" class="suggestions-list"></div>
+          </div>
+
+          <p id="location-confirm" class="location-confirmed text-success small mt-2"
+            style="<%= user.homeLocation ? 'display:block;' : 'display:none;' %>">
+            <i class="fa-solid fa-circle-check"></i>
+            Location set: <span id="location-confirm-text">
+              <%= user.homeLocation || '' %>
+            </span>
+          </p>
+        </div>
+
+        <!-- Hidden inputs submitted to server -->
+        <input type="hidden" id="homeLocation" name="homeLocation" value="<%= user.homeLocation || '' %>">
+        <input type="hidden" id="lat" name="lat"
+          value="<%= (user.geometry && user.geometry.coordinates) ? user.geometry.coordinates[1] : '' %>">
+        <input type="hidden" id="lng" name="lng"
+          value="<%= (user.geometry && user.geometry.coordinates) ? user.geometry.coordinates[0] : '' %>">
+
+        <div class="col-12 mt-4">
+          <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Save Home Location
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById('location-search');
+      const suggestionsBox = document.getElementById('suggestions');
+      const homeLocationInput = document.getElementById('homeLocation');
+      const latInput = document.getElementById('lat');
+      const lngInput = document.getElementById('lng');
+      const confirmMsg = document.getElementById('location-confirm');
+      const confirmText = document.getElementById('location-confirm-text');
+
+      let debounceTimer;
+
+      searchInput.addEventListener('input', () => {
+        // Keep homeLocationInput in sync in case user types manually
+        homeLocationInput.value = searchInput.value;
+        latInput.value = '';
+        lngInput.value = '';
+        confirmMsg.style.display = 'none';
+
+        clearTimeout(debounceTimer);
+        const query = searchInput.value.trim();
+        if (query.length < 3) {
+          suggestionsBox.innerHTML = '';
+          return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+          try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            renderSuggestions(data);
+          } catch (err) {
+            suggestionsBox.innerHTML = '<div class="suggestion-item muted">Search failed, try again.</div>';
+          }
+        }, 400);
+      });
+
+      function renderSuggestions(results) {
+        suggestionsBox.innerHTML = '';
+        if (!results.length) {
+          suggestionsBox.innerHTML = '<div class="suggestion-item muted">No matches found.</div>';
+          return;
+        }
+        results.forEach((place) => {
+          const item = document.createElement('div');
+          item.className = 'suggestion-item';
+          item.textContent = place.display_name;
+          item.addEventListener('click', () => {
+            searchInput.value = place.display_name;
+            homeLocationInput.value = place.display_name;
+            latInput.value = place.lat;
+            lngInput.value = place.lon;
+            suggestionsBox.innerHTML = '';
+            confirmText.textContent = place.display_name;
+            confirmMsg.style.display = 'block';
+          });
+          suggestionsBox.appendChild(item);
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
+          suggestionsBox.innerHTML = '';
+        }
+      });
+    })();
+  </script>

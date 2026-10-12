@@ -30,9 +30,42 @@ const UserSchema = new Schema({
     type: [String],
     default: [],
   },
+  homeLocation: {
+    type: String,
+    default: "",
+  },
+  geometry: {
+    type: {
+      type: String,
+      enum: ["Point"],
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+    },
+  },
   isAdmin: {
     type: Boolean,
     default: false,
+  },
+  ratingAvg: {
+    type: Number,
+    default: 0,
+  },
+  ratingCount: {
+    type: Number,
+    default: 0,
+  },
+  completedShifts: {
+    type: Number,
+    default: 0,
+  },
+  noShows: {
+    type: Number,
+    default: 0,
+  },
+  trustScore: {
+    type: Number,
+    default: 70,
   },
   wishlist: [
     {
@@ -43,6 +76,7 @@ const UserSchema = new Schema({
 });
 
 UserSchema.plugin(passportLocalMongoose);
+UserSchema.index({ geometry: "2dsphere" });
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

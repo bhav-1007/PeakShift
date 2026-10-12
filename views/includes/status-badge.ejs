@@ -1,0 +1,52 @@
+<%
+  let badgeClass = 'bg-secondary-subtle text-secondary-emphasis border';
+  let badgeIcon = '';
+  let badgeText = status || 'Unknown';
+
+  switch (status) {
+    case 'open':
+      badgeClass = 'bg-success-subtle text-success-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-circle-dot me-1"></i>';
+      badgeText = 'Open';
+      break;
+    case 'filled':
+      badgeClass = 'bg-secondary-subtle text-secondary-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-users me-1"></i>';
+      badgeText = 'Filled';
+      break;
+    case 'cancelled':
+      badgeClass = 'bg-danger-subtle text-danger-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-ban me-1"></i>';
+      badgeText = 'Cancelled';
+      break;
+    case 'expired':
+      badgeClass = 'bg-dark-subtle text-dark-emphasis border';
+      badgeIcon = '<i class="fa-regular fa-clock me-1"></i>';
+      badgeText = 'Expired';
+      break;
+    case 'accepted':
+      badgeClass = 'bg-warning-subtle text-warning-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-hourglass-half me-1"></i>';
+      badgeText = 'Accepted';
+      break;
+    case 'checked_in':
+      badgeClass = 'bg-primary-subtle text-primary border';
+      badgeIcon = '<i class="fa-solid fa-location-dot me-1"></i>';
+      badgeText = 'Checked In';
+      break;
+    case 'completed':
+      badgeClass = 'bg-success-subtle text-success-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
+      badgeText = 'Completed';
+      break;
+    case 'no_show':
+      badgeClass = 'bg-danger-subtle text-danger-emphasis border';
+      badgeIcon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
+      badgeText = 'No Show';
+      break;
+    default:
+      badgeClass = 'bg-secondary-subtle text-secondary-emphasis border';
+      badgeText = status;
+  }
+%>
+<span class="badge <%= badgeClass %> px-2 py-1" style="font-size:0.78rem; font-weight:600;"><%- badgeIcon %><%= badgeText %></span>

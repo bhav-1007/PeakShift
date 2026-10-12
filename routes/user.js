@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const wrapAsync = require("../utils/wrapAsync.js");
-const { saveRedirectUrl } = require("../middleware.js");
-const { userSchema } = require("../schema.js");
+const { saveRedirectUrl, isLoggedIn, isWorker } = require("../middleware.js");
+const { userSchema, profileSchema } = require("../schema.js");
 const userController = require("../controllers/user.js");
 
 const validateUser = (req, res, next) => {
@@ -12,6 +12,16 @@ const validateUser = (req, res, next) => {
     const msg = error.details.map((el) => el.message).join(", ");
     req.flash("error", msg);
     return res.redirect("/signup");
+  }
+  next();
+};
+
+const validateProfile = (req, res, next) => {
+  const { error } = profileSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(", ");
+    req.flash("error", msg);
+    return res.redirect("/profile");
   }
   next();
 };
@@ -37,5 +47,10 @@ router.post(
 );
 
 router.get("/logout", userController.logout);
+
+router
+  .route("/profile")
+  .get(isLoggedIn, isWorker, wrapAsync(userController.renderProfile))
+  .post(isLoggedIn, isWorker, validateProfile, wrapAsync(userController.updateProfile));
 
 module.exports = router;

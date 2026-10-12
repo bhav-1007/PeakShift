@@ -1,0 +1,111 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="page-heading">
+    <div class="page-heading-header">
+        <div>
+            <h1>Shift Spend & Payroll Disbursements</h1>
+            <p class="muted mb-0">Review total payroll spend, platform fees, and worker payout disbursements.</p>
+        </div>
+        <div>
+            <span class="badge bg-primary-subtle text-primary border fs-6 px-3 py-2">
+                <i class="fa-solid fa-coins me-1"></i> Total Spend: &#8377; <%= totals.allTimeGross.toLocaleString('en-IN') %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info d-flex align-items-center gap-2 mb-4" style="border-radius:var(--radius);">
+    <i class="fa-solid fa-circle-info"></i>
+    <span><strong>Simulated payout:</strong> Shift completion records immediate simulated disbursements to verified workers.</span>
+</div>
+
+<section class="stats-grid mb-4">
+    <div class="stat-card">
+        <span>Today's Spend</span>
+        <strong>&#8377; <%= totals.todayGross.toLocaleString('en-IN') %></strong>
+        <span class="text-muted small">Worker Net: &#8377; <%= totals.todayNet.toLocaleString('en-IN') %></span>
+    </div>
+    <div class="stat-card">
+        <span>This Week</span>
+        <strong>&#8377; <%= totals.weekGross.toLocaleString('en-IN') %></strong>
+        <span class="text-muted small">Worker Net: &#8377; <%= totals.weekNet.toLocaleString('en-IN') %></span>
+    </div>
+    <div class="stat-card">
+        <span>This Month</span>
+        <strong>&#8377; <%= totals.monthGross.toLocaleString('en-IN') %></strong>
+        <span class="text-muted small">Worker Net: &#8377; <%= totals.monthNet.toLocaleString('en-IN') %></span>
+    </div>
+    <div class="stat-card">
+        <span>Total Gross Spend</span>
+        <strong style="color:var(--accent-coral, #ff5a5f);">&#8377; <%= totals.allTimeGross.toLocaleString('en-IN') %></strong>
+        <span class="text-muted small">Worker Net: &#8377; <%= totals.allTimeNet.toLocaleString('en-IN') %> &bull; Fee: &#8377; <%= totals.allTimeFee.toLocaleString('en-IN') %></span>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <div class="section-heading mb-3">
+        <h2>Simulated Payout Disbursements</h2>
+        <span class="text-muted small"><%= transactions.length %> disbursement(s) recorded</span>
+    </div>
+
+    <% if (transactions && transactions.length > 0) { %>
+        <div class="table-responsive" style="background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); overflow:hidden;">
+            <table class="table mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="padding-left:16px;">Date & Time (IST)</th>
+                        <th>Shift</th>
+                        <th>Worker</th>
+                        <th>Gross Pay</th>
+                        <th>Platform Fee (10%)</th>
+                        <th>Worker Net</th>
+                        <th style="padding-right:16px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% transactions.forEach(t => { %>
+                        <tr>
+                            <td style="padding-left:16px;">
+                                <%= timeHelpers.formatIST(t.createdAt) %>
+                            </td>
+                            <td>
+                                <% if (t.booking && t.booking.listing) { %>
+                                    <a href="/listings/<%= t.booking.listing._id %>" class="fw-bold">
+                                        <%= t.booking.listing.title %>
+                                    </a>
+                                <% } else { %>
+                                    Shift completed
+                                <% } %>
+                            </td>
+                            <td>
+                                <strong><%= (t.worker && t.worker.username) || "Worker" %></strong>
+                            </td>
+                            <td class="fw-bold">
+                                &#8377; <%= t.gross.toLocaleString('en-IN') %>
+                            </td>
+                            <td class="text-muted">
+                                &#8377; <%= t.platformFee.toLocaleString('en-IN') %>
+                            </td>
+                            <td class="text-success">
+                                &#8377; <%= t.workerNet.toLocaleString('en-IN') %>
+                            </td>
+                            <td style="padding-right:16px;">
+                                <span class="badge bg-success">
+                                    <i class="fa-solid fa-check me-1"></i> Simulated payout
+                                </span>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <%- include('../includes/empty-state', {
+            icon: 'fa-solid fa-receipt',
+            title: 'No spend records yet',
+            message: 'You have not completed any worker shifts yet. Completed worker shifts will appear here as simulated payouts.',
+            actionText: 'Manage active shifts',
+            actionLink: '/dashboard'
+        }) %>
+    <% } %>
+</section>

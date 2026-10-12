@@ -7,6 +7,8 @@ const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 const User = require("../models/user.js");
 const Booking = require("../models/booking.js");
+const Review = require("../models/review.js");
+const Notification = require("../models/notification.js");
 
 const dbUrl = process.env.ATLAS_URL || "mongodb://127.0.0.1:27017/PeakShift";
 
@@ -15,6 +17,8 @@ const initDB = async () => {
   await Listing.deleteMany({});
   await User.deleteMany({});
   await Booking.deleteMany({});
+  await Review.deleteMany({});
+  await Notification.deleteMany({});
 
   // 1. Create 2 Business Users
   const biz1 = await User.register(
@@ -47,6 +51,11 @@ const initDB = async () => {
       role: "worker",
       skills: ["packing", "food safety", "dispatch"],
       phone: "9123456780",
+      homeLocation: "Indiranagar, Bengaluru",
+      geometry: {
+        type: "Point",
+        coordinates: [77.6412, 12.9719],
+      },
     }),
     "workerpass123"
   );
@@ -86,7 +95,8 @@ const initDB = async () => {
 
   // 3. Assign listings to the two businesses
   const businesses = [biz1._id, biz2._id];
-  const listings = initData.data.map((obj, index) => ({
+  const sampleListings = initData.getSampleListings ? initData.getSampleListings() : initData.data;
+  const listings = sampleListings.map((obj, index) => ({
     ...obj,
     owner: businesses[index % businesses.length],
   }));

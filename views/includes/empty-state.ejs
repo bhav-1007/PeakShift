@@ -1,0 +1,12 @@
+<div class="empty-state-card text-center p-4 my-3" style="background:var(--surface, #ffffff); border:1px solid var(--line, #e2e8f0); border-radius:var(--radius-lg, 12px);">
+  <div class="empty-state-icon mb-3" style="font-size: 2.5rem; color: var(--muted, #64748b);">
+    <i class="<%= (typeof icon !== 'undefined' && icon) ? icon : 'fa-solid fa-folder-open' %>"></i>
+  </div>
+  <h4 class="empty-state-title mb-2" style="font-weight: 600;"><%= (typeof title !== 'undefined' && title) ? title : 'No records found' %></h4>
+  <p class="empty-state-message text-muted mb-3" style="max-width: 480px; margin-left: auto; margin-right: auto;">
+    <%= (typeof message !== 'undefined' && message) ? message : 'There is nothing to display here right now.' %>
+  </p>
+  <% if (typeof actionText !== 'undefined' && actionText && typeof actionLink !== 'undefined' && actionLink) { %>
+    <a class="btn btn-primary" href="<%= actionLink %>"><%= actionText %></a>
+  <% } %>
+</div>

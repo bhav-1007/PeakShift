@@ -2,24 +2,95 @@
 
 <section class="pw-section pw-hero">
   <div class="pw-hero-copy">
-    <p class="pw-eyebrow">Real-time staffing for peak-hour demand</p>
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background:var(--brand-light); border:1px solid rgba(37,99,235,0.15);">
+      <span class="pw-status-dot" style="background:var(--brand);"></span>
+      <span style="color:var(--brand-dark); font-weight:700; font-size:0.8rem; letter-spacing:0.03em; text-transform:uppercase;">Real-time staffing for peak-hour demand</span>
+    </div>
     <h1 class="pw-heading pw-hero-title">Making labor as flexible as demand itself.</h1>
-    <p class="pw-hero-subtitle">PeakShift connects businesses that need extra hands for 2-4 hour rushes with verified workers looking for flexible earning opportunities.</p>
+    <p class="pw-hero-subtitle">PeakShift connects businesses needing extra hands for 2–4 hour rushes with verified workers looking for flexible, high-yield earning opportunities nearby.</p>
     <div class="pw-hero-actions">
-      <a class="pw-btn pw-btn-primary pw-btn-lg" href="/listings">Find Open Shifts</a>
-      <a class="pw-btn pw-btn-ghost pw-btn-lg" href="/listings/new">Post a Shift</a>
+      <a class="pw-btn pw-btn-primary pw-btn-lg" href="/listings">
+        <i class="fa-solid fa-magnifying-glass me-1"></i> Find Open Shifts
+      </a>
+      <a class="pw-btn pw-btn-ghost pw-btn-lg" href="/listings/new">
+        <i class="fa-solid fa-plus me-1"></i> Post a Shift
+      </a>
+    </div>
+
+    <!-- Live trust reassurance strip -->
+    <div class="d-flex flex-wrap align-items-center gap-4 mt-4 pt-2 text-muted small">
+      <span class="d-inline-flex align-items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-success"></i> <strong>70+ Min Trust Score</strong>
+      </span>
+      <span class="d-inline-flex align-items-center gap-2">
+        <i class="fa-solid fa-location-crosshairs text-primary"></i> <strong>300m GPS Verification</strong>
+      </span>
+      <span class="d-inline-flex align-items-center gap-2">
+        <i class="fa-solid fa-bolt text-warning"></i> <strong>Instant Simulated Payout</strong>
+      </span>
     </div>
   </div>
 
   <div class="pw-hero-panel" aria-label="Live staffing preview">
     <div class="pw-live-card">
-      <span class="pw-status-pill"><span class="pw-status-dot"></span>Live match</span>
-      <h2>Cloud kitchen dinner rush</h2>
-      <p class="muted">2 packers and 1 helper needed from 7 PM&ndash;10 PM near Indiranagar.</p>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="pw-status-pill mb-0">
+          <span class="pw-status-dot"></span>Live Match Active
+        </span>
+        <span class="badge bg-primary-subtle text-primary border" style="font-size:0.75rem;">
+          <i class="fa-solid fa-fire me-1"></i>Peak Rush
+        </span>
+      </div>
+
+      <h2 style="font-size:1.25rem; font-weight:800; margin:10px 0 6px;">Cloud Kitchen Dinner Rush</h2>
+      <p class="muted small mb-3">
+        <i class="fa-solid fa-location-dot text-primary me-1"></i>Indiranagar, Bengaluru &bull; 7:00 PM – 10:00 PM
+      </p>
+
+      <!-- Live Roster Fill Meter -->
+      <div class="p-3 mb-3 rounded" style="background:var(--surface-soft); border:1px solid var(--line);">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small fw-bold text-dark">
+            <i class="fa-solid fa-users text-primary me-1"></i> Live Crew Staffing
+          </span>
+          <span class="badge bg-success-subtle text-success-emphasis" style="font-size:0.75rem;">
+            2 of 3 slots confirmed
+          </span>
+        </div>
+        <div class="shift-progress-track mb-2">
+          <div class="shift-progress-bar bg-primary" style="width: 67%;"></div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <span class="badge bg-white text-dark border small py-1 px-2">
+            <i class="fa-solid fa-circle-check text-success me-1"></i>Slot 1: Confirmed (Trust: 95)
+          </span>
+          <span class="badge bg-white text-dark border small py-1 px-2">
+            <i class="fa-solid fa-circle-check text-success me-1"></i>Slot 2: Confirmed (Trust: 98)
+          </span>
+          <span class="badge bg-light text-muted border border-dashed small py-1 px-2">
+            <i class="fa-solid fa-user-plus text-primary me-1"></i>1 slot remaining
+          </span>
+        </div>
+      </div>
+
       <div class="pw-shift-metrics">
-        <div><strong>15</strong><span>matched workers</span></div>
-        <div><strong>3 km</strong><span>radius</span></div>
-        <div><strong>&#8377;150</strong><span>per hour</span></div>
+        <div>
+          <strong>15</strong>
+          <span>matched nearby</span>
+        </div>
+        <div>
+          <strong>3 km</strong>
+          <span>proximity radius</span>
+        </div>
+        <div>
+          <strong>&#8377;150</strong>
+          <span>per hour pay</span>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
+        <span><i class="fa-solid fa-camera text-primary me-1"></i> Selfie Check-In</span>
+        <span class="text-success fw-semibold"><i class="fa-solid fa-check-double me-1"></i> Payout Ready</span>
       </div>
     </div>
   </div>
@@ -30,11 +101,19 @@
   <div class="pw-stats-inner">
     <div class="pw-stat">
       <span class="pw-stat-num"><%= stats.openShifts %>+</span>
-      <span class="pw-stat-label">Open shifts</span>
+      <span class="pw-stat-label">Active Open Shifts</span>
     </div>
     <div class="pw-stat">
       <span class="pw-stat-num">&#8377;<%= stats.avgPay %></span>
-      <span class="pw-stat-label">Avg. pay / hour</span>
+      <span class="pw-stat-label">Avg. Hourly Pay</span>
+    </div>
+    <div class="pw-stat">
+      <span class="pw-stat-num">300m</span>
+      <span class="pw-stat-label">GPS Geofenced Check-In</span>
+    </div>
+    <div class="pw-stat">
+      <span class="pw-stat-num">&lt; 5m</span>
+      <span class="pw-stat-label">Simulated Payout Cycle</span>
     </div>
   </div>
 </section>
@@ -42,74 +121,95 @@
 
 <section class="pw-section">
   <div class="pw-section-heading-inline">
-    <h2 class="pw-heading pw-heading-sm">Open Peak Shifts</h2>
-    <a class="pw-text-link" href="/listings">Browse all &rarr;</a>
+    <div>
+      <h2 class="pw-heading pw-heading-sm mb-1">Open Peak Shifts</h2>
+      <p class="muted mb-0">High-demand hourly slots starting soon across Bengaluru.</p>
+    </div>
+    <a class="pw-text-link" href="/listings">
+      Browse all shifts <i class="fa-solid fa-arrow-right ms-1"></i>
+    </a>
   </div>
 
   <% if (featuredListings && featuredListings.length > 0) { %>
-  <div class="pw-featured-grid">
+  <ul class="shift-list">
     <% featuredListings.forEach(listing => { %>
-      <a class="pw-card pw-featured-card" href="/listings/<%= listing._id %>">
-        <img class="pw-featured-image" src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>" alt="<%= listing.title %>">
-        <div class="pw-featured-info">
-          <h3 class="pw-featured-title"><%= listing.title %></h3>
-          <p class="pw-featured-location"><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></p>
-          <p class="pw-featured-price">&#8377; <%= listing.price.toLocaleString('en-IN') %> <span class="pw-price-unit">per hour</span></p>
-        </div>
-      </a>
+      <%- include("includes/shift-card", { listing, timeHelpers }) %>
     <% }) %>
-  </div>
+  </ul>
   <% } else { %>
-    <p class="muted">No shifts are live yet. Post the first peak-hour request.</p>
+    <div style="padding: 40px 24px; text-align: center; background: var(--surface); border:1px solid var(--line); border-radius: var(--radius-lg);">
+      <p class="muted mb-3">No open shifts are currently scheduled.</p>
+      <a class="pw-btn pw-btn-primary" href="/listings/new">Post a Shift</a>
+    </div>
   <% } %>
 </section>
 
-<section id="how-it-works" class="pw-section pw-section-soft">
-  <h2 class="pw-heading pw-heading-sm pw-center">How PeakShift Works</h2>
+<section id="how-it-works" class="pw-section pw-section-soft" style="border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="pw-center">
+    <p class="pw-eyebrow">Simplicity by Design</p>
+    <h2 class="pw-heading pw-heading-sm">How PeakShift Works</h2>
+    <p class="muted" style="max-width:560px; margin:0 auto;">From sudden footfall spike to verified workers on site and automated payouts in three simple steps.</p>
+  </div>
+
   <div class="pw-steps-grid">
     <div class="pw-card pw-step-card">
-      <div class="pw-step-number">1</div>
-      <h3>Create a shift</h3>
-      <p class="muted">Businesses post role, location, pay, timing, and worker count for a short demand spike.</p>
+      <div class="pw-step-number">01</div>
+      <div class="mb-3 text-primary" style="font-size:1.6rem;"><i class="fa-solid fa-bullhorn"></i></div>
+      <h3>Post in 60 seconds</h3>
+      <p class="muted mb-0">Businesses define the role, hourly pay, start/end times, and worker slots for any demand surge.</p>
     </div>
     <div class="pw-card pw-step-card">
-      <div class="pw-step-number">2</div>
-      <h3>Match verified workers</h3>
-      <p class="muted">Workers discover nearby opportunities by availability, skill tags, and trust history.</p>
+      <div class="pw-step-number">02</div>
+      <div class="mb-3 text-primary" style="font-size:1.6rem;"><i class="fa-solid fa-satellite-dish"></i></div>
+      <h3>Radar Match & Accept</h3>
+      <p class="muted mb-0">Verified workers within a 20 km radius discover shifts by distance, skill tags, and trust scores.</p>
     </div>
     <div class="pw-card pw-step-card">
-      <div class="pw-step-number">3</div>
-      <h3>Check in and get paid</h3>
-      <p class="muted">Workers check in for their shift and get rated on completion, building trust for future matches</p>
+      <div class="pw-step-number">03</div>
+      <div class="mb-3 text-primary" style="font-size:1.6rem;"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+      <h3>Check In & Get Paid</h3>
+      <p class="muted mb-0">Workers check in via GPS + selfie. Upon completion, business triggers instantaneous simulated payout.</p>
     </div>
   </div>
 </section>
 
 <section id="categories" class="pw-section">
-  <h2 class="pw-heading pw-heading-sm pw-center">Built for recurring local rushes</h2>
-  <div class="pw-market-grid">
-    <div class="pw-market-tile"><i class="fa-solid fa-utensils"></i><span>Restaurants and QSRs</span></div>
-    <div class="pw-market-tile"><i class="fa-solid fa-kitchen-set"></i><span>Cloud kitchens</span></div>
-    <div class="pw-market-tile"><i class="fa-solid fa-bag-shopping"></i><span>Retail stores</span></div>
-    <div class="pw-market-tile"><i class="fa-solid fa-prescription-bottle-medical"></i><span>Pharmacies</span></div>
-    <div class="pw-market-tile"><i class="fa-solid fa-film"></i><span>Multiplex cinemas</span></div>
-    <div class="pw-market-tile"><i class="fa-solid fa-calendar-day"></i><span>Events</span></div>
+  <div class="pw-center">
+    <p class="pw-eyebrow">Peak-Hour Specialization</p>
+    <h2 class="pw-heading pw-heading-sm">Built for recurring local rushes</h2>
+    <p class="muted" style="max-width:560px; margin:0 auto;">Tailored workflows for high-frequency short-duration staffing spikes across high-footfall industries.</p>
   </div>
-</section>
 
-<% if (topReviews && topReviews.length > 0) { %>
-<section class="pw-section pw-section-soft">
-  <h2 class="pw-heading pw-heading-sm pw-center">What People Are Saying</h2>
-  <div class="pw-review-grid">
-    <% topReviews.forEach(review => { %>
-      <div class="pw-card pw-review-card">
-        <div class="pw-review-stars">
-          <% for (let s = 0; s < review.rating; s++) { %><i class="fa-solid fa-star"></i><% } %>
-        </div>
-        <p class="pw-review-quote">&ldquo;<%= review.comment %>&rdquo;</p>
-        <p class="pw-review-meta">&mdash; <%= review.author %>, on <%= review.listingTitle %></p>
-      </div>
-    <% }) %>
+  <div class="pw-market-grid">
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-utensils"></i>
+      <span>Restaurants & QSRs</span>
+      <small class="text-muted" style="font-size:0.75rem;">Lunch & Dinner Rushes</small>
+    </div>
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-kitchen-set"></i>
+      <span>Cloud Kitchens</span>
+      <small class="text-muted" style="font-size:0.75rem;">Online Dispatch Spikes</small>
+    </div>
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-bag-shopping"></i>
+      <span>Retail Showrooms</span>
+      <small class="text-muted" style="font-size:0.75rem;">Weekend Footfall Surges</small>
+    </div>
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-prescription-bottle-medical"></i>
+      <span>Pharmacies</span>
+      <small class="text-muted" style="font-size:0.75rem;">Morning & Evening Queues</small>
+    </div>
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-film"></i>
+      <span>Cinemas & Theatres</span>
+      <small class="text-muted" style="font-size:0.75rem;">Showtime Concessions</small>
+    </div>
+    <div class="pw-market-tile">
+      <i class="fa-solid fa-calendar-day"></i>
+      <span>Events & Popups</span>
+      <small class="text-muted" style="font-size:0.75rem;">Registration & Support</small>
+    </div>
   </div>
 </section>
-<% } %>

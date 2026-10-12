@@ -66,10 +66,31 @@ module.exports.isGuestOnBooking = async (req, res, next) => {
     return res.redirect("/bookings/my");
   }
 
-  if (!booking.guest || !booking.guest.equals(req.user._id)) {
+  const workerId = booking.worker || booking.guest;
+  if (!workerId || !workerId.equals(req.user._id)) {
     req.flash("error", "You don't have permission to do that!");
     return res.redirect("/bookings/my");
   }
 
+  next();
+};
+
+module.exports.isWorkerOnBooking = module.exports.isGuestOnBooking;
+
+module.exports.isBusinessOwnerOfBooking = async (req, res, next) => {
+  const { bookingId } = req.params;
+  const booking = await Booking.findById(bookingId).populate("listing");
+
+  if (!booking || !booking.listing) {
+    req.flash("error", "Shift booking not found!");
+    return res.redirect("/dashboard");
+  }
+
+  if (!booking.listing.owner || !booking.listing.owner.equals(req.user._id)) {
+    req.flash("error", "You don't have permission to do that!");
+    return res.redirect("/dashboard");
+  }
+
+  req.booking = booking;
   next();
 };

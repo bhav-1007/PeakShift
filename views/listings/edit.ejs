@@ -1,15 +1,22 @@
 <% layout('layouts/boilerplate') %>
 
-<section class="container mt-4">
+<section class="py-2">
   <div class="row">
-    <div class="col-8 offset-2">
-      <div class="form-panel">
+    <div class="col-lg-8 offset-lg-2">
+      <div class="form-panel shadow-sm">
         <h1>Edit Shift Request</h1>
 
-        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" enctype="multipart/form-data">
+        <% if (listing.filledCount > 0) { %>
+          <div class="alert alert-warning" style="border-radius: var(--radius); margin-bottom: 20px;">
+            <i class="fa-solid fa-lock me-2"></i>
+            <strong>Edit Lock Active:</strong> <%= listing.filledCount %> worker<%= listing.filledCount > 1 ? "s have" : " has" %> already accepted this shift. Title, timing, slots, and location are locked. Only the shift details/description can be edited.
+          </div>
+        <% } %>
+
+        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
           <div>
             <label for="title">Shift title</label>
-            <input type="text" id="title" name="listing[title]" value="<%= listing.title %>" placeholder="Cloud kitchen dinner rush" required>
+            <input type="text" id="title" name="listing[title]" value="<%= listing.title %>" placeholder="Cloud kitchen dinner rush" required <%= listing.filledCount > 0 ? 'disabled' : '' %>>
           </div>
 
           <div>
@@ -19,80 +26,55 @@
 
           <div>
             <label for="roleType">Role type</label>
-            <input type="text" id="roleType" name="listing[roleType]" value="<%= listing.roleType || '' %>" placeholder="Packer, helper cook, cashier, event crew">
+            <input type="text" id="roleType" name="listing[roleType]" value="<%= listing.roleType || '' %>" placeholder="Packer, helper cook, cashier, event crew" <%= listing.filledCount > 0 ? 'disabled' : '' %>>
           </div>
 
           <div class="booking-date-grid">
             <div>
-              <label for="workersNeeded">Workers needed</label>
-              <input type="number" id="workersNeeded" name="listing[workersNeeded]" value="<%= listing.workersNeeded || 1 %>" required min="1">
+              <label for="workersNeeded">Workers needed (slots)</label>
+              <input type="number" id="workersNeeded" name="listing[workersNeeded]" value="<%= listing.workersNeeded || 1 %>" required min="1" <%= listing.filledCount > 0 ? 'disabled' : '' %>>
             </div>
             <div>
               <label for="skillTags">Skill tags</label>
-              <input type="text" id="skillTags" name="listing[skillTags]" value="<%= listing.skillTags ? listing.skillTags.join(', ') : '' %>" placeholder="packing, POS, cleaning">
+              <input type="text" id="skillTags" name="listing[skillTags]" value="<%= listing.skillTags ? listing.skillTags.join(', ') : '' %>" placeholder="packing, POS, cleaning" <%= listing.filledCount > 0 ? 'disabled' : '' %>>
             </div>
           </div>
 
           <div class="booking-date-grid">
             <div>
-              <label for="shiftDate">Shift date</label>
-              <input type="date" id="shiftDate" name="listing[shiftDate]" value="<%= listing.shiftDate ? listing.shiftDate.toISOString().slice(0, 10) : '' %>">
+              <label for="startAt">Shift start time (IST)</label>
+              <input type="datetime-local" id="startAt" name="listing[startAt]" value="<%= timeHelpers.formatForDateTimeLocal(listing.startAt) %>" required <%= listing.filledCount > 0 ? 'disabled' : '' %>>
             </div>
-            <div class="booking-date-grid">
-              <label for="startTime">
-                Start
-                <input type="time" id="startTime" name="listing[startTime]" value="<%= listing.startTime || '' %>">
-              </label>
-              <label for="endTime">
-                End
-                <input type="time" id="endTime" name="listing[endTime]" value="<%= listing.endTime || '' %>">
-              </label>
+            <div>
+              <label for="endAt">Shift end time (IST)</label>
+              <input type="datetime-local" id="endAt" name="listing[endAt]" value="<%= timeHelpers.formatForDateTimeLocal(listing.endAt) %>" required <%= listing.filledCount > 0 ? 'disabled' : '' %>>
             </div>
           </div>
 
-          <div>
-            <label class="form-label d-block">Current workplace image</label>
-            <img
-              src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>"
-              alt="Current shift image"
-              class="rounded mb-2"
-              style="max-width: 250px; max-height: 180px; object-fit: cover;"
-            >
-            <label for="image">Upload New Image (optional)</label>
-            <input type="file" id="image" name="listing[image]" accept="image/*">
-            <p class="muted" style="margin-top:4px;">Leave blank to keep the current image.</p>
-          </div>
+
 
           <div>
-            <label for="price">Hourly pay</label>
-            <input type="number" id="price" name="listing[price]" value="<%= listing.price %>" placeholder="150" required min="0">
+            <label for="price">Hourly pay (&#8377;)</label>
+            <input type="number" id="price" name="listing[price]" value="<%= listing.price %>" placeholder="150" required min="0" <%= listing.filledCount > 0 ? 'disabled' : '' %>>
           </div>
 
           <div style="position:relative;">
             <label for="location-search">Location</label>
-            <input type="text" id="location-search" value="<%= listing.location %>" placeholder="Start typing an address or city..." autocomplete="off" required>
+            <input type="text" id="location-search" value="<%= listing.location %>" placeholder="Start typing an address or city..." autocomplete="off" required <%= listing.filledCount > 0 ? 'disabled' : '' %>>
             <div id="suggestions" class="location-suggestions"></div>
-            <p class="muted" id="location-confirm" style="margin-top:6px;">
-              <i class="fa-solid fa-circle-check"></i> Location confirmed: <span id="location-confirm-text"><%= listing.location %></span>
+            <p class="muted" id="location-confirm" style="margin-top:6px; display:none;">
+              <i class="fa-solid fa-circle-check"></i> Location confirmed: <span id="location-confirm-text"></span>
             </p>
           </div>
 
-          <!-- Hidden fields actually submitted to the server, pre-filled with existing values -->
+          <!-- Hidden fields actually submitted to the server -->
           <input type="hidden" id="location" name="listing[location]" value="<%= listing.location %>">
-          <input type="hidden" id="country" name="listing[country]" value="<%= listing.country %>">
           <input type="hidden" id="lat" name="listing[lat]" value="<%= listing.geometry && listing.geometry.coordinates ? listing.geometry.coordinates[1] : '' %>">
           <input type="hidden" id="lng" name="listing[lng]" value="<%= listing.geometry && listing.geometry.coordinates ? listing.geometry.coordinates[0] : '' %>">
 
-          <% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
-          <div class="col-12" style="margin-top:12px;">
-            <label class="form-label d-block">Current Map Location</label>
-            <div id="map" style="height:250px; border-radius:var(--radius-lg); border:2px solid var(--ink);"></div>
-          </div>
-          <% } %>
-
           <div class="col-12" style="margin-top:16px;">
-            <button class="btn" type="submit">Update Shift</button>
-            <a class="btn btn-outline-secondary ms-2" href="/listings/<%= listing._id %>">Back to shift</a>
+            <button class="btn btn-primary" type="submit">Update Shift Request</button>
+            <a class="btn danger ms-2" href="/listings/<%= listing._id %>">Cancel</a>
           </div>
         </form>
       </div>
@@ -100,34 +82,12 @@
   </div>
 </section>
 
-<% if (listing.geometry && listing.geometry.coordinates && listing.geometry.coordinates.length === 2) { %>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  const coords = <%- JSON.stringify(listing.geometry.coordinates) %>; // [lng, lat]
-
-  if (Array.isArray(coords) && coords.length === 2) {
-    const map = L.map('map').setView([coords[1], coords[0]], 12);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
-
-    L.marker([coords[1], coords[0]])
-      .addTo(map)
-      .bindPopup("<%= listing.title %>");
-  } else {
-    console.error("Invalid coordinates for map:", coords);
-  }
-</script>
-<% } %>
-
+<% if (listing.filledCount === 0) { %>
 <script>
   (function () {
     const searchInput = document.getElementById('location-search');
     const suggestionsBox = document.getElementById('suggestions');
     const locationInput = document.getElementById('location');
-    const countryInput = document.getElementById('country');
     const latInput = document.getElementById('lat');
     const lngInput = document.getElementById('lng');
     const confirmMsg = document.getElementById('location-confirm');
@@ -136,12 +96,6 @@
     let debounceTimer;
 
     searchInput.addEventListener('input', () => {
-      // typing again invalidates the previously confirmed selection
-      // (whether that was the original saved location or an earlier search result)
-      locationInput.value = '';
-      countryInput.value = '';
-      latInput.value = '';
-      lngInput.value = '';
       confirmMsg.style.display = 'none';
 
       clearTimeout(debounceTimer);
@@ -176,7 +130,6 @@
         item.addEventListener('click', () => {
           searchInput.value = place.display_name;
           locationInput.value = place.display_name;
-          countryInput.value = (place.address && place.address.country) || '';
           latInput.value = place.lat;
           lngInput.value = place.lon;
           suggestionsBox.innerHTML = '';
@@ -187,21 +140,17 @@
       });
     }
 
-    // close suggestions if clicking elsewhere
     document.addEventListener('click', (e) => {
       if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
         suggestionsBox.innerHTML = '';
       }
     });
 
-    // prevent submitting if the user started typing a new search
-    // but never picked a suggestion from the list
     searchInput.closest('form').addEventListener('submit', (e) => {
-      if (!latInput.value || !lngInput.value) {
-        e.preventDefault();
-        alert('Please select a location from the suggestions list.');
-        searchInput.focus();
+      if (!locationInput.value) {
+        locationInput.value = searchInput.value.trim();
       }
     });
   })();
 </script>
+<% } %>

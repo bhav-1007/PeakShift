@@ -1,18 +1,18 @@
 <% layout('layouts/boilerplate') %>
 
-<section class="container mt-4">
-  <div class="form-panel">
-        <h1>Post a Peak Shift</h1>
+<section class="py-2">
+  <div class="form-panel shadow-sm">
+    <h1>Post a Peak Shift</h1>
 
-    <form method="POST" action="/listings" enctype="multipart/form-data">
+    <form method="POST" action="/listings">
       <div>
-            <label for="title">Shift title</label>
-            <input type="text" id="title" name="listing[title]" placeholder="Cloud kitchen dinner rush" required>
+        <label for="title">Shift title</label>
+        <input type="text" id="title" name="listing[title]" placeholder="Cloud kitchen dinner rush" required>
       </div>
 
       <div>
-            <label for="description">Shift details</label>
-            <textarea id="description" name="listing[description]" placeholder="Describe the work, reporting instructions, required experience, and payout details." required></textarea>
+        <label for="description">Shift details</label>
+        <textarea id="description" name="listing[description]" placeholder="Describe the work, reporting instructions, required experience, and payout details." required></textarea>
       </div>
 
       <div>
@@ -22,7 +22,7 @@
 
       <div class="booking-date-grid">
         <div>
-          <label for="workersNeeded">Workers needed</label>
+          <label for="workersNeeded">Workers needed (slots)</label>
           <input type="number" id="workersNeeded" name="listing[workersNeeded]" value="1" required min="1">
         </div>
         <div>
@@ -33,29 +33,18 @@
 
       <div class="booking-date-grid">
         <div>
-          <label for="shiftDate">Shift date</label>
-          <input type="date" id="shiftDate" name="listing[shiftDate]">
+          <label for="startAt">Shift start time (IST)</label>
+          <input type="datetime-local" id="startAt" name="listing[startAt]" required>
         </div>
-        <div class="booking-date-grid">
-          <label for="startTime">
-            Start
-            <input type="time" id="startTime" name="listing[startTime]">
-          </label>
-          <label for="endTime">
-            End
-            <input type="time" id="endTime" name="listing[endTime]">
-          </label>
+        <div>
+          <label for="endAt">Shift end time (IST)</label>
+          <input type="datetime-local" id="endAt" name="listing[endAt]" required>
         </div>
       </div>
 
       <div>
-            <label for="image">Business or workplace image</label>
-        <input type="file" id="image" name="listing[image]" accept="image/*">
-      </div>
-
-      <div>
-            <label for="price">Hourly pay</label>
-            <input type="number" id="price" name="listing[price]" placeholder="150" required min="0">
+        <label for="price">Hourly pay (&#8377;)</label>
+        <input type="number" id="price" name="listing[price]" placeholder="150" required min="0">
       </div>
 
       <div style="position:relative;">
@@ -69,12 +58,11 @@
 
       <!-- Hidden fields actually submitted to the server -->
       <input type="hidden" id="location" name="listing[location]">
-      <input type="hidden" id="country" name="listing[country]">
       <input type="hidden" id="lat" name="listing[lat]">
       <input type="hidden" id="lng" name="listing[lng]">
 
       <div class="col-12">
-        <button class="btn" type="submit">Post Shift</button>
+        <button class="btn btn-primary" type="submit">Post Shift</button>
       </div>
     </form>
   </div>
@@ -85,7 +73,6 @@
     const searchInput = document.getElementById('location-search');
     const suggestionsBox = document.getElementById('suggestions');
     const locationInput = document.getElementById('location');
-    const countryInput = document.getElementById('country');
     const latInput = document.getElementById('lat');
     const lngInput = document.getElementById('lng');
     const confirmMsg = document.getElementById('location-confirm');
@@ -94,9 +81,7 @@
     let debounceTimer;
 
     searchInput.addEventListener('input', () => {
-      // typing again invalidates any previously confirmed selection
       locationInput.value = '';
-      countryInput.value = '';
       latInput.value = '';
       lngInput.value = '';
       confirmMsg.style.display = 'none';
@@ -133,7 +118,6 @@
         item.addEventListener('click', () => {
           searchInput.value = place.display_name;
           locationInput.value = place.display_name;
-          countryInput.value = (place.address && place.address.country) || '';
           latInput.value = place.lat;
           lngInput.value = place.lon;
           suggestionsBox.innerHTML = '';
@@ -144,19 +128,16 @@
       });
     }
 
-    // close suggestions if clicking elsewhere
     document.addEventListener('click', (e) => {
       if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
         suggestionsBox.innerHTML = '';
       }
     });
 
-    // prevent submitting without a confirmed selection
     searchInput.closest('form').addEventListener('submit', (e) => {
-      if (!latInput.value || !lngInput.value) {
-        e.preventDefault();
-        alert('Please select a location from the suggestions list.');
-        searchInput.focus();
+      if (!locationInput.value) {
+        // Fallback: use whatever text was entered if user didn't pick from dropdown
+        locationInput.value = searchInput.value.trim();
       }
     });
   })();

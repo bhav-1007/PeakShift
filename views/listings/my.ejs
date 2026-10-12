@@ -5,24 +5,21 @@
         <h1>My Shift Requests</h1>
         <p>All peak-hour staffing requests posted by your business.</p>
     </div>
+    <a class="btn" href="/listings/new">Post Shift</a>
 </div>
 
-<% if (myListings.length > 0) { %>
-    <ul class="listing-grid">
+<% if (myListings && myListings.length > 0) { %>
+    <ul class="shift-list">
         <% myListings.forEach(listing => { %>
-            <li class="listing-card">
-                <a href="/listings/<%= listing._id %>">
-                    <img src="<%= (listing.image && listing.image.url) ? listing.image.url : '/images/placeholder.svg' %>" alt="<%= listing.title %>">
-                </a>
-                <div class="listing-card-body">
-                    <h2><a href="/listings/<%= listing._id %>"><%= listing.title %></a></h2>
-                    <p><%= listing.description %></p>
-                    <p class="price">&#8377; <%= listing.price.toLocaleString('en-IN') %> / hour</p>
-                </div>
-            </li>
+            <%- include('../includes/shift-card', { listing, timeHelpers }) %>
         <% }) %>
     </ul>
 <% } else { %>
-    <p class="muted">You have not posted any shifts yet.</p>
-    <a class="btn" href="/listings/new">Post your first shift</a>
+    <%- include('../includes/empty-state', {
+        icon: 'fa-solid fa-briefcase',
+        title: 'No shift requests yet',
+        message: 'You have not posted any shifts yet. Post your first shift to recruit verified workers for peak hours.',
+        actionText: 'Post a shift',
+        actionLink: '/listings/new'
+    }) %>
 <% } %>

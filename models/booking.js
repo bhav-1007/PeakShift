@@ -8,37 +8,55 @@ const bookingSchema = new Schema(
       ref: "Listing",
       required: true,
     },
-    guest: {
+    worker: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    checkIn: {
+    startAt: {
       type: Date,
       required: true,
     },
-    checkOut: {
+    endAt: {
       type: Date,
       required: true,
     },
-    totalNights: {
+    hours: {
       type: Number,
       required: true,
     },
-    totalPrice: {
+    payAmount: {
       type: Number,
       required: true,
+    },
+    platformFee: {
+      type: Number,
+      required: true,
+    },
+    checkInAt: {
+      type: Date,
+    },
+    checkInCoords: {
+      lat: Number,
+      lng: Number,
+    },
+    checkInDistanceM: {
+      type: Number,
+    },
+    checkInSelfie: {
+      url: String,
+      filename: String,
     },
     status: {
       type: String,
-      enum: ["confirmed", "cancelled"],
-      default: "confirmed",
+      enum: ["accepted", "cancelled", "checked_in", "completed", "no_show"],
+      default: "accepted",
     },
   },
   { timestamps: true }
 );
 
-bookingSchema.index({ listing: 1, status: 1, checkIn: 1, checkOut: 1 });
-bookingSchema.index({ guest: 1, checkIn: 1 });
+bookingSchema.index({ listing: 1, status: 1, startAt: 1, endAt: 1 });
+bookingSchema.index({ worker: 1, status: 1, startAt: 1 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

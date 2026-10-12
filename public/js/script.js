@@ -50,4 +50,27 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // Poll unread notification count every 30 seconds
+  const notifBadge = document.getElementById("nav-unread-badge");
+  if (notifBadge) {
+    function fetchUnreadCount() {
+      fetch("/notifications/unread-count")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && typeof data.unreadCount === "number") {
+            if (data.unreadCount > 0) {
+              notifBadge.textContent = data.unreadCount > 99 ? "99+" : data.unreadCount;
+              notifBadge.classList.remove("d-none");
+            } else {
+              notifBadge.classList.add("d-none");
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    fetchUnreadCount();
+    setInterval(fetchUnreadCount, 30000);
+  }
 });

@@ -25,6 +25,15 @@
         <% } %>
 
         <% if (currentUser) { %>
+          <li class="nav-item">
+            <a class="nav-link position-relative d-flex align-items-center me-lg-2" href="/notifications" id="nav-notification-bell" title="Notifications">
+              <i class="fa-solid fa-bell fa-lg"></i>
+              <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle d-none" id="nav-unread-badge" style="font-size: 0.65rem;">
+                0
+              </span>
+            </a>
+          </li>
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-solid fa-circle-user fa-lg"></i>
@@ -33,10 +42,12 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
               <% if (currentUser.role === 'business') { %>
                 <li><a class="dropdown-item" href="/dashboard"><i class="fa-solid fa-chart-line me-2"></i>Dashboard</a></li>
+                <li><a class="dropdown-item" href="/spend"><i class="fa-solid fa-receipt me-2"></i>Shift Spend</a></li>
                 <li><a class="dropdown-item" href="/listings/my"><i class="fa-solid fa-list me-2"></i>My Shift Requests</a></li>
-                <li><a class="dropdown-item" href="/listings/trash"><i class="fa-solid fa-box-archive me-2"></i>Archive</a></li>
               <% } else if (currentUser.role === 'worker') { %>
+                <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user me-2"></i>My Profile</a></li>
                 <li><a class="dropdown-item" href="/bookings/my"><i class="fa-solid fa-calendar-check me-2"></i>My Shifts</a></li>
+                <li><a class="dropdown-item" href="/earnings"><i class="fa-solid fa-wallet me-2"></i>My Earnings</a></li>
               <% } %>
               <li><a class="dropdown-item" href="/listings/wishlist"><i class="fa-solid fa-heart me-2"></i>Watchlist</a></li>
               <li><hr class="dropdown-divider"></li>

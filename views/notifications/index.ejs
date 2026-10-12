@@ -1,0 +1,54 @@
+<% layout('layouts/boilerplate') %>
+
+<section class="pw-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="pw-heading pw-heading-sm mb-1">
+                <i class="fa-solid fa-bell text-primary me-2"></i>Notifications
+            </h1>
+            <p class="muted mb-0">Stay updated on nearby shifts, booking status changes, and payouts.</p>
+        </div>
+        <% if (notifications && notifications.some(n => !n.read)) { %>
+            <form method="POST" action="/notifications/mark-all-read" class="mb-0">
+                <button class="btn btn-sm btn-outline-primary" type="submit">
+                    <i class="fa-solid fa-check-double me-1"></i>Mark all as read
+                </button>
+            </form>
+        <% } %>
+    </div>
+
+    <% if (notifications && notifications.length > 0) { %>
+        <div class="list-group shadow-sm" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <% notifications.forEach(notif => { %>
+                <form method="POST" action="/notifications/<%= notif._id %>/read" class="mb-0">
+                    <button type="submit" class="list-group-item list-group-item-action d-flex align-items-start gap-3 p-3 text-start w-100 border-0 <%= notif.read ? 'bg-white' : 'bg-light' %>" style="border-bottom: 1px solid var(--line) !important;">
+                        <div class="mt-1">
+                            <% if (!notif.read) { %>
+                                <span class="d-inline-block rounded-circle bg-primary" style="width: 10px; height: 10px;" title="Unread"></span>
+                            <% } else { %>
+                                <i class="fa-regular fa-bell text-muted"></i>
+                            <% } %>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="mb-1 text-dark <%= notif.read ? '' : 'fw-bold' %>">
+                                <%= notif.message %>
+                            </p>
+                            <small class="text-muted">
+                                <i class="fa-solid fa-clock me-1"></i><%= timeHelpers.formatIST(notif.createdAt) %>
+                            </small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-muted mt-2" style="font-size: 0.8rem;"></i>
+                    </button>
+                </form>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <%- include('../includes/empty-state', {
+            icon: 'fa-solid fa-bell-slash',
+            title: 'No notifications',
+            message: 'You are all caught up! You will receive alerts when nearby shifts match your skills or booking statuses change.',
+            actionText: 'Browse open shifts',
+            actionLink: '/listings'
+        }) %>
+    <% } %>
+</section>

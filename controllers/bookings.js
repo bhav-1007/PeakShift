@@ -1,119 +1,272 @@
 const Booking = require("../models/booking.js");
 const Listing = require("../models/listing.js");
-
-const HOUR_MS = 1000 * 60 * 60;
-
-function parseDateTime(value) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
+const Review = require("../models/review.js");
+const Transaction = require("../models/transaction.js");
+const bookingService = require("../services/bookingService.js");
+const { haversineDistance } = require("../utils/geo.js");
+const { recomputeUserTrust } = require("../utils/trust.js");
+const { notify } = require("../utils/notifications.js");
+const {
+  CHECKIN_OPENS_MIN_BEFORE,
+  CHECKIN_RADIUS_M,
+  PLATFORM_FEE_RATE,
+} = require("../config/index.js");
 
 module.exports.createBooking = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const booking = await bookingService.acceptShift(id, req.user._id);
+    const listing = await Listing.findById(id);
+    if (listing && listing.owner) {
+      await notify(
+        listing.owner,
+        `Worker ${req.user.username} accepted a slot for "${listing.title}"`,
+        "/dashboard"
+      );
+    }
+    req.flash("success", "Shift accepted! See your reporting details below.");
+    res.redirect("/bookings/my");
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect(`/listings/${id}`);
+  }
+};
+
+module.exports.myBookings = async (req, res) => {
+  const bookings = await Booking.find({ worker: req.user._id })
+    .populate({ path: "listing", populate: { path: "owner" } })
+    .sort({ startAt: 1 });
+
+  const myReviews = await Review.find({ author: req.user._id });
+  const reviewedBookingIds = new Set(myReviews.map((r) => r.booking.toString()));
+
+  res.render("bookings/my.ejs", {
+    bookings,
+    reviewedBookingIds,
+    config: { CHECKIN_OPENS_MIN_BEFORE, CHECKIN_RADIUS_M },
+  });
+};
+
+module.exports.cancelBooking = async (req, res) => {
+  try {
+    const booking = await bookingService.cancelShiftByWorker(req.params.bookingId, req.user._id);
+    if (booking && booking.listing && booking.listing.owner) {
+      await notify(
+        booking.listing.owner,
+        `Worker ${req.user.username} cancelled their accepted slot for "${booking.listing.title}"`,
+        "/dashboard"
+      );
+    }
+    req.flash("success", "Shift acceptance cancelled.");
+  } catch (err) {
+    req.flash("error", err.message);
+  }
+  res.redirect("/bookings/my");
+};
+
+module.exports.checkIn = async (req, res) => {
+  const { bookingId } = req.params;
+  const booking = await Booking.findById(bookingId).populate("listing");
+
+  if (!booking) {
+    req.flash("error", "Shift booking not found.");
+    return req.session.save(() => res.redirect("/bookings/my"));
+  }
+
+  if (booking.status !== "accepted") {
+    req.flash("error", `Cannot check in: this shift is already ${booking.status}.`);
+    return req.session.save(() => res.redirect("/bookings/my"));
+  }
+
+  const now = new Date();
+  const opensBeforeMs = (CHECKIN_OPENS_MIN_BEFORE || 30) * 60 * 1000;
+  const windowStart = new Date(booking.startAt.getTime() - opensBeforeMs);
+  const windowEnd = booking.endAt;
+
+  // 1. Time checks
+  if (now < windowStart) {
+    req.flash(
+      "error",
+      `Too early to check in. Check-in opens ${CHECKIN_OPENS_MIN_BEFORE} minutes before shift start.`
+    );
+    return req.session.save(() => res.redirect("/bookings/my"));
+  }
+
+  if (now > windowEnd) {
+    req.flash("error", "Too late to check in. Shift has already ended.");
+    return req.session.save(() => res.redirect("/bookings/my"));
+  }
+
+  // 2. Geolocation coordinates check
+  const { lat, lng } = req.body;
+  const userLat = parseFloat(lat);
+  const userLng = parseFloat(lng);
+
+  if (isNaN(userLat) || isNaN(userLng)) {
+    req.flash("error", "Location missing. Please allow location access to check in.");
+    return req.session.save(() => res.redirect("/bookings/my"));
+  }
+
+  // 3. Proximity / Radius check against shift location
+  let distanceM = 0;
+  if (booking.listing && booking.listing.geometry && booking.listing.geometry.coordinates) {
+    const distanceKm = haversineDistance([userLng, userLat], booking.listing.geometry.coordinates);
+    distanceM = Math.round((distanceKm || 0) * 1000);
+
+    const maxRadius = CHECKIN_RADIUS_M || 300;
+    if (distanceM > maxRadius) {
+      req.flash(
+        "error",
+        `Too far from shift location. You are ${distanceM}m away (maximum ${maxRadius}m allowed).`
+      );
+      return req.session.save(() => res.redirect("/bookings/my"));
+    }
+  }
+
+  // 4. Update booking
+  booking.status = "checked_in";
+  booking.checkInAt = now;
+  booking.checkInCoords = { lat: userLat, lng: userLng };
+  booking.checkInDistanceM = distanceM;
+
+  if (req.file) {
+    booking.checkInSelfie = {
+      url: req.file.path,
+      filename: req.file.filename,
+    };
+  }
+
+  await booking.save();
+
+  // Notify listing owner that worker checked in
+  if (booking.listing && booking.listing.owner) {
+    await notify(
+      booking.listing.owner,
+      `Worker ${req.user.username} checked in for "${booking.listing.title}"`,
+      "/dashboard"
+    );
+  }
+
+  req.flash("success", "Checked in successfully! Have a great shift.");
+  req.session.save(() => res.redirect("/bookings/my"));
+};
+
+module.exports.completeBooking = async (req, res) => {
+  const { bookingId } = req.params;
+  const booking = await Booking.findById(bookingId).populate("listing");
+
+  if (!booking) {
+    req.flash("error", "Shift booking not found.");
+    return res.redirect("/dashboard");
+  }
+
+  const now = new Date();
+  if (now < booking.endAt) {
+    req.flash("error", "Cannot mark completed before shift end time.");
+    return res.redirect("/dashboard");
+  }
+
+  // Atomic update makes double-clicks safe
+  const updated = await Booking.findOneAndUpdate(
+    { _id: bookingId, status: "checked_in" },
+    { status: "completed" },
+    { new: true }
+  );
+
+  if (!updated) {
+    req.flash("error", "Worker is not checked in or already completed.");
+    return res.redirect("/dashboard");
+  }
+
+  const gross = updated.payAmount;
+  const platformFee = updated.platformFee || Math.round(gross * (PLATFORM_FEE_RATE || 0.1));
+  const workerNet = gross - platformFee;
+
+  try {
+    await Transaction.create({
+      booking: updated._id,
+      worker: updated.worker,
+      business: req.user._id,
+      gross,
+      platformFee,
+      workerNet,
+    });
+  } catch (err) {
+    // If unique key violation, transaction already exists (double-click safe)
+  }
+
+  // Recompute trust scores
+  await recomputeUserTrust(updated.worker);
+  await recomputeUserTrust(req.user._id);
+
+  // Notify worker of completion and payout
+  await notify(
+    updated.worker,
+    `Shift completed! Simulated payout processed for "${booking.listing ? booking.listing.title : 'your shift'}"`,
+    "/earnings"
+  );
+
+  req.flash("success", "Worker marked completed. Simulated payout processed.");
+  res.redirect("/dashboard");
+};
+
+module.exports.completeAllForListing = async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
 
   if (!listing) {
-    req.flash("error", "Shift request does not exist!");
-    return res.redirect("/listings");
+    req.flash("error", "Shift request not found.");
+    return res.redirect("/dashboard");
   }
 
-  if (listing.deleted) {
-    req.flash("error", "This shift is not available.");
-    return res.redirect("/listings");
+  const now = new Date();
+  if (now < listing.endAt) {
+    req.flash("error", "Cannot mark completed before shift end time.");
+    return res.redirect("/dashboard");
   }
 
-  if (listing.owner && listing.owner.equals(req.user._id)) {
-    req.flash("error", "You cannot accept your own shift request.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  if (req.user.role !== "worker") {
-    req.flash("error", "Only workers can accept shift requests.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  const checkIn = parseDateTime(req.body.startAt || req.body.checkIn);
-  const checkOut = parseDateTime(req.body.endAt || req.body.checkOut);
-
-  if (!checkIn || !checkOut) {
-    req.flash("error", "Please choose valid shift start and end times.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  if (checkIn < new Date()) {
-    req.flash("error", "Shift start time cannot be in the past.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  if (checkOut <= checkIn) {
-    req.flash("error", "Shift end time must be after the start time.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  const workerConflict = await Booking.findOne({
-    guest: req.user._id,
-    status: "confirmed",
-    checkIn: { $lt: checkOut },
-    checkOut: { $gt: checkIn },
-  });
-
-  if (workerConflict) {
-    req.flash("error", "You already accepted an overlapping shift. Please choose another window.");
-    return res.redirect(`/listings/${id}`);
-  }
-
-  const acceptedCount = await Booking.countDocuments({
+  const checkedInBookings = await Booking.find({
     listing: id,
-    status: "confirmed",
-    checkIn: { $lt: checkOut },
-    checkOut: { $gt: checkIn },
+    status: "checked_in",
   });
 
-  if (acceptedCount >= (listing.workersNeeded || 1)) {
-    req.flash("error", "This shift is already fully staffed.");
-    return res.redirect(`/listings/${id}`);
+  let completedCount = 0;
+  for (const b of checkedInBookings) {
+    const updated = await Booking.findOneAndUpdate(
+      { _id: b._id, status: "checked_in" },
+      { status: "completed" },
+      { new: true }
+    );
+    if (updated) {
+      completedCount++;
+      const gross = updated.payAmount;
+      const platformFee = updated.platformFee || Math.round(gross * (PLATFORM_FEE_RATE || 0.1));
+      const workerNet = gross - platformFee;
+      try {
+        await Transaction.create({
+          booking: updated._id,
+          worker: updated.worker,
+          business: req.user._id,
+          gross,
+          platformFee,
+          workerNet,
+        });
+      } catch (err) {
+        // Double-click idempotency
+      }
+      await recomputeUserTrust(updated.worker);
+      await notify(
+        updated.worker,
+        `Shift completed! Simulated payout processed for "${listing.title}"`,
+        "/earnings"
+      );
+    }
   }
 
-  const totalNights = Math.max(1, Math.round((checkOut - checkIn) / HOUR_MS));
-  const totalPrice = totalNights * listing.price;
-
-  await Booking.create({
-    listing: listing._id,
-    guest: req.user._id,
-    checkIn,
-    checkOut,
-    totalNights,
-    totalPrice,
-  });
-
-  req.flash("success", "Shift accepted. Check-in and payment details are ready.");
-  res.redirect("/bookings/my");
-};
-
-module.exports.myBookings = async (req, res) => {
-  const bookings = await Booking.find({ guest: req.user._id })
-    .populate("listing")
-    .sort({ checkIn: 1 });
-
-  res.render("bookings/my.ejs", { bookings });
-};
-
-module.exports.cancelBooking = async (req, res) => {
-  const booking = await Booking.findById(req.params.bookingId);
-  if (!booking) {
-    req.flash("error", "Booking not found.");
-    return res.redirect("/bookings/my");
+  if (completedCount > 0) {
+    await recomputeUserTrust(req.user._id);
   }
 
-  if (booking.status !== "confirmed") {
-    req.flash("error", "Only confirmed shifts can be cancelled.");
-    return res.redirect("/bookings/my");
-  }
-
-  booking.status = "cancelled";
-  await booking.save();
-
-  req.flash("success", "Shift acceptance cancelled.");
-  res.redirect("/bookings/my");
+  req.flash("success", `Marked ${completedCount} worker(s) completed. Simulated payouts processed.`);
+  res.redirect("/dashboard");
 };

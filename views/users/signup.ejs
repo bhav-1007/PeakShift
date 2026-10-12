@@ -1,63 +1,90 @@
 <% layout('/layouts/boilerplate') %>
 
-<div class="form-panel">
-  <h1>Sign Up</h1>
-  <p class="muted">Create a PeakShift account to post shifts or accept nearby work.</p>
+<div class="d-flex justify-content-center align-items-center py-4">
+  <div class="form-panel shadow-sm" style="max-width: 540px; width:100%; border-radius:var(--radius-xl); padding:36px 32px;">
+    <div class="text-center mb-4">
+      <div class="brand-mark mx-auto mb-3" style="width:48px; height:48px; font-size:1.3rem;">P</div>
+      <h1 style="font-size:1.75rem; font-weight:800; margin-bottom:6px;">Join PeakShift</h1>
+      <p class="muted small mb-0">Create your account to post shifts or earn during peak hours.</p>
+    </div>
 
-  <form action="/users" method="POST">
-    <div class="form-group">
-      <label class="form-label d-block fw-bold" style="margin-bottom:8px;">I am joining PeakShift because:</label>
-      <div style="display:flex; gap:12px; margin-bottom:12px;">
-        <label id="labelWorker" style="flex:1; border:2px solid var(--line); border-radius:var(--radius); padding:12px; cursor:pointer; text-align:center;">
-          <input type="radio" name="role" id="roleWorker" value="worker" checked style="margin-right:6px;">
-          <strong>I want shifts</strong>
-          <span class="muted d-block small" style="margin-top:4px;">Find flexible hourly shifts</span>
-        </label>
-        <label id="labelBusiness" style="flex:1; border:2px solid var(--line); border-radius:var(--radius); padding:12px; cursor:pointer; text-align:center;">
-          <input type="radio" name="role" id="roleBusiness" value="business" style="margin-right:6px;">
-          <strong>I need workers</strong>
-          <span class="muted d-block small" style="margin-top:4px;">Hire helpers for rushes</span>
-        </label>
+    <form action="/users" method="POST" class="d-grid gap-3">
+      <div class="form-group mb-2">
+        <label class="form-label d-block fw-bold mb-2">I am joining PeakShift because:</label>
+        <div style="display:flex; gap:12px;">
+          <label id="labelWorker" class="role-selector-card" style="flex:1; border:2px solid var(--brand); background:var(--brand-light); border-radius:var(--radius); padding:14px 10px; cursor:pointer; text-align:center; transition:all 150ms ease;">
+            <input type="radio" name="role" id="roleWorker" value="worker" checked style="margin-right:6px;">
+            <strong class="d-block text-dark mt-1"><i class="fa-solid fa-person-walking-luggage me-1 text-primary"></i> I want shifts</strong>
+            <span class="muted d-block small" style="font-size:0.75rem; margin-top:2px;">Find flexible hourly work</span>
+          </label>
+          <label id="labelBusiness" class="role-selector-card" style="flex:1; border:2px solid var(--line); background:var(--surface); border-radius:var(--radius); padding:14px 10px; cursor:pointer; text-align:center; transition:all 150ms ease;">
+            <input type="radio" name="role" id="roleBusiness" value="business" style="margin-right:6px;">
+            <strong class="d-block text-dark mt-1"><i class="fa-solid fa-store me-1 text-primary"></i> I need workers</strong>
+            <span class="muted d-block small" style="font-size:0.75rem; margin-top:2px;">Hire helpers for rushes</span>
+          </label>
+        </div>
       </div>
-    </div>
 
-    <div class="form-group" id="businessNameGroup" style="display:none;">
-      <label for="businessName">Business Name</label>
-      <input type="text" id="businessName" name="businessName" placeholder="e.g. Indiranagar Kitchen">
-    </div>
+      <div class="form-group mb-0" id="businessNameGroup" style="display:none;">
+        <label for="businessName" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-solid fa-building text-primary"></i> Business Name
+        </label>
+        <input type="text" id="businessName" name="businessName" placeholder="e.g. Indiranagar Cloud Kitchen">
+      </div>
 
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required>
-    </div>
+      <div class="form-group mb-0">
+        <label for="username" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-regular fa-user text-primary"></i> Username
+        </label>
+        <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="username">
+      </div>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required>
-    </div>
+      <div class="form-group mb-0">
+        <label for="email" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-regular fa-envelope text-primary"></i> Email Address
+        </label>
+        <input type="email" id="email" name="email" placeholder="name@company.com" required autocomplete="email">
+      </div>
 
-    <div class="form-group">
-      <label for="phone">Phone Number (optional)</label>
-      <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210">
-    </div>
+      <div class="form-group mb-0">
+        <label for="phone" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-solid fa-phone text-primary"></i> Phone Number (optional)
+        </label>
+        <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210">
+      </div>
 
-    <div class="form-group" id="skillsGroup">
-      <label for="skills">Skills (optional)</label>
-      <input type="text" id="skills" name="skills" placeholder="e.g. packing, POS, cleaning">
-    </div>
+      <div class="form-group mb-0" id="skillsGroup">
+        <label for="skills" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-solid fa-tags text-primary"></i> Skills (optional, comma-separated)
+        </label>
+        <input type="text" id="skills" name="skills" placeholder="e.g. packing, POS, counter, cleaning">
+      </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required>
-    </div>
+      <div class="form-group mb-0">
+        <label for="password" class="d-flex align-items-center gap-1 mb-1">
+          <i class="fa-solid fa-lock text-primary"></i> Password
+        </label>
+        <input type="password" id="password" name="password" placeholder="Create a secure password" required autocomplete="new-password">
+      </div>
 
-    <button type="submit" class="btn">Sign Up</button>
-  </form>
+      <button type="submit" class="btn btn-primary w-100 mt-2" style="min-height:48px; font-size:1rem;">
+        Create Account <i class="fa-solid fa-arrow-right ms-1"></i>
+      </button>
+    </form>
+
+    <div class="text-center mt-4 pt-3 border-top">
+      <p class="muted small mb-0">
+        Already have an account? <a href="/login" class="text-primary fw-semibold text-decoration-none">Log in here</a>
+      </p>
+    </div>
+  </div>
 </div>
 
 <script>
   const roleWorker = document.getElementById('roleWorker');
   const roleBusiness = document.getElementById('roleBusiness');
+  const labelWorker = document.getElementById('labelWorker');
+  const labelBusiness = document.getElementById('labelBusiness');
   const businessNameGroup = document.getElementById('businessNameGroup');
   const businessNameInput = document.getElementById('businessName');
   const skillsGroup = document.getElementById('skillsGroup');
@@ -67,10 +94,20 @@
       businessNameGroup.style.display = 'block';
       businessNameInput.setAttribute('required', 'required');
       if (skillsGroup) skillsGroup.style.display = 'none';
+
+      labelBusiness.style.borderColor = 'var(--brand)';
+      labelBusiness.style.background = 'var(--brand-light)';
+      labelWorker.style.borderColor = 'var(--line)';
+      labelWorker.style.background = 'var(--surface)';
     } else {
       businessNameGroup.style.display = 'none';
       businessNameInput.removeAttribute('required');
       if (skillsGroup) skillsGroup.style.display = 'block';
+
+      labelWorker.style.borderColor = 'var(--brand)';
+      labelWorker.style.background = 'var(--brand-light)';
+      labelBusiness.style.borderColor = 'var(--line)';
+      labelBusiness.style.background = 'var(--surface)';
     }
   }
 

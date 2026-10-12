@@ -65,3 +65,38 @@ module.exports.logout = (req, res, next) => {
     res.redirect("/listings");
   });
 };
+
+module.exports.renderProfile = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  res.render("users/profile.ejs", { user });
+};
+
+module.exports.updateProfile = async (req, res) => {
+  const { homeLocation, lat, lng } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    req.flash("error", "User not found!");
+    return res.redirect("/login");
+  }
+
+  user.homeLocation = homeLocation;
+
+  if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+    user.geometry = {
+      type: "Point",
+      coordinates: [parseFloat(lng), parseFloat(lat)],
+    };
+  } else if (homeLocation) {
+    const geocodeLocation = require("../utils/geocode.js");
+    const geo = await geocodeLocation(homeLocation);
+    if (geo) {
+      user.geometry = geo;
+    }
+  }
+
+  await user.save();
+  req.flash("success", "Profile and home location updated successfully!");
+  res.redirect("/profile");
+};
+
