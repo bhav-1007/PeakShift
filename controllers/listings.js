@@ -3,6 +3,7 @@ const User = require("../models/user.js");
 const { cloudinary } = require("../cloudConfig.js");
 const geocodeLocation = require("../utils/geocode.js");
 const sampleData = require("../init/data.js");
+const escapeRegex = require("../utils/escapeRegex.js");
 
 module.exports.index = async (req, res) => {
   const { q, minPrice, maxPrice, country, page = 1 } = req.query;
@@ -11,13 +12,15 @@ module.exports.index = async (req, res) => {
   let filter = { deleted: false };
 
   if (q) {
+    const safeQ = escapeRegex(q);
     filter.$or = [
-      { title: { $regex: q, $options: "i" } },
-      { location: { $regex: q, $options: "i" } },
+      { title: { $regex: safeQ, $options: "i" } },
+      { location: { $regex: safeQ, $options: "i" } },
     ];
   }
   if (country) {
-    filter.country = { $regex: `^${country}$`, $options: "i" };
+    const safeCountry = escapeRegex(country);
+    filter.country = { $regex: `^${safeCountry}$`, $options: "i" };
   }
   if (minPrice || maxPrice) {
     filter.price = {};
