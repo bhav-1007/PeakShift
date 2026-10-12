@@ -1,367 +1,418 @@
-<div align="center">
-
 # ⚡ PeakShift
-### Real-Time Hyper-Local Micro-Shift Staffing & Instant Workforce Marketplace
+### Making Labor as Flexible as Work Itself
 
-[![Node.js](https://img.shields.io/badge/Node.js-v20%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-5.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%7C%20Mongoose%208-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Leaflet](https://img.shields.io/badge/Maps-Leaflet%20%26%20OSM-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
-[![Bootstrap](https://img.shields.io/badge/UI-Bootstrap%205%20%2B%20Vanilla%20CSS-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+**A hyperlocal, short-duration workforce marketplace that connects businesses facing temporary staffing shortages with workers looking for flexible, nearby earning opportunities.**
 
-**Making hourly labor as agile, responsive, and predictable as modern demand spikes.**
+PeakShift helps businesses fill short-term staffing gaps and enables workers to discover, book, and complete hourly shifts without committing to long-term employment.
 
-[Explore Open Shifts](http://127.0.0.1:8080/listings) • [Architecture Overview](#system-architecture) • [Feature Deep Dive](#minute-by-minute-feature-deep-dive) • [Live Demo Walkthrough](#judges-live-demo-walkthrough)
-
-</div>
+<p align="center">
+  <strong>Discover Shifts · Match Locally · Verify Attendance · Track Earnings</strong>
+</p>
 
 ---
 
-## 📌 Executive Summary & Problem Statement
+## 📌 Table of Contents
 
-High-throughput urban businesses face a structural **labor-demand mismatch**:
-- **The Problem for Businesses**: Cloud kitchens face frantic 7:00 PM – 10:00 PM dinner surges; artisanal cafes experience 8:00 AM – 11:00 AM espresso rushes; quick-commerce dark stores get slammed during festive weekend windows. Traditional staffing agencies require multi-week commitments and fixed monthly payroll, while standard gig delivery platforms do not solve on-site physical floor staffing.
-- **The Problem for Hourly Workers**: Students, part-time workers, and semi-skilled laborers want immediate, flexible, hyper-local earning opportunities (2 to 4 hours) near their homes without locked-in contracts, delayed bi-weekly payrolls, or predatory commission structures.
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Our Solution](#-our-solution)
+- [Key Features](#-key-features)
+- [How It Works](#-how-it-works)
+- [System Architecture](#-system-architecture)
+- [Technology Stack](#-technology-stack)
+- [Application Structure](#-application-structure)
+- [Database Design](#-database-design)
+- [Core Workflows](#-core-workflows)
+- [Security and Reliability](#-security-and-reliability)
 
-### The PeakShift Solution
-**PeakShift** is a full-stack, hyper-local micro-shift marketplace delivering rapid labor matching with:
-1. **Space-Efficient, Image-Free Operations**: High-density shift telemetry that loads instantly, eliminating photo upload friction.
-2. **Atomic Slot Concurrency**: Mathematical impossibility of slot overselling via single-round-trip MongoDB atomic increments.
-3. **Geofenced Proof-of-Presence**: Mandatory GPS coordinate radius validation (300m) paired with live selfie facial verification.
-4. **Dual-Sided Dynamic Trust Math**: Algorithmic reputation scoring (0–100) dynamically recalculated on shift completions, no-shows, and mutual reviews.
-5. **Automated Lifecycle Sweeper**: Autonomous background daemon expiring past shifts and penalizing no-shows.
-6. **Transparent Ledgering**: Simulated escrow payouts with immutable transaction records and detailed analytics.
+## 🎯 Overview
 
----
+Businesses such as cafés, restaurants, cloud kitchens, retail stores, and event venues often experience sudden increases in demand. Hiring permanent employees for every peak period is expensive, while traditional staffing arrangements may be too slow or inflexible.
 
-## 🏛️ System Architecture
+At the same time, students, part-time workers, and people seeking additional income need flexible work opportunities that fit their schedules and are located close to them.
+
+**PeakShift bridges this gap through a digital micro-shift marketplace.**
+
+Businesses can publish short-duration shifts with defined roles, working hours, pay rates, and staffing requirements. Workers can discover relevant opportunities, check availability, reserve a slot, verify their attendance, and track their earnings.
+
+### Who is PeakShift for?
+
+| Businesses | Workers |
+|---|---|
+| Restaurants and cafés | College students |
+| Cloud kitchens | Part-time workers |
+| Retail stores | Freelancers seeking hourly work |
+| Event organizers | People seeking flexible income |
+| Small and local businesses | Workers looking for nearby shifts |
+
+## 🚨 Problem Statement
+
+### For businesses
+- Unexpected demand creates temporary staffing shortages.
+- Traditional hiring processes are often too slow for immediate requirements.
+- Hiring full-time employees for short peak periods can increase operational costs.
+- Managing worker availability, attendance, and payments across multiple shifts can be difficult.
+
+### For workers
+- Finding short-duration work opportunities nearby can be challenging.
+- Many jobs require fixed schedules or longer-term commitments.
+- Workers may lack clear information about shift duration, total earnings, and remaining vacancies.
+- Attendance records, work history, and payment breakdowns may not be transparent.
+
+## 💡 Our Solution
+
+PeakShift introduces a structured marketplace where businesses and workers can coordinate temporary staffing through a single application.
+
+The platform focuses on:
+
+- **Hyperlocal discovery:** Find shifts based on proximity, location, skills, and timing.
+- **Flexible staffing:** Publish and fill short-duration work opportunities.
+- **Controlled booking:** Track available slots and prevent overbooking through conditional database updates.
+- **Attendance verification:** Combine location checks with selfie evidence during check-in.
+- **Reputation and accountability:** Maintain ratings and trust scores based on work history.
+- **Transparent earnings:** Provide workers and businesses with simulated payout records and spending summaries.
+- **Automated operations:** Handle shift expiration, missed check-ins, and notifications through background processing.
+
+## ✨ Key Features
+
+### 1. Business Shift Management
+
+Businesses can create and manage staffing opportunities with structured details, including:
+
+- Job title and role description
+- Required skills and worker count
+- Shift start and end times
+- Hourly pay rate and estimated total compensation
+- Workplace address and geographic location
+- Shift status and staffing progress
+
+**Availability tracking:** Visual indicators display filled positions, remaining vacancies, and overall staffing progress.
+
+**Controlled editing:** Important shift terms are restricted from modification after workers have accepted slots, helping protect workers against significant changes to agreed conditions.
+
+**Cancellation management:** Businesses can cancel shifts and notify affected workers through the platform.
+
+### 2. Hyperlocal Shift Discovery
+
+Workers can browse opportunities based on their location and preferences.
+
+Features include:
+
+- Nearby shift discovery using geographic coordinates
+- Distance-based search with configurable radius options
+- Search by job title and role
+- Skill-based filtering
+- Minimum hourly pay filtering
+- Time-based filters for upcoming shifts
+- Sorting by proximity, start time, and pay
+- Map-based shift location visualization
+- Fallback to a saved location when live browser location is unavailable, where supported
+
+The application uses MongoDB geospatial queries and distance calculations to support location-aware discovery.
+
+### 3. Worker Booking and Slot Management
+
+Workers can reserve available positions in a shift.
+
+The booking workflow includes:
+
+- Availability validation before accepting a booking
+- Prevention of duplicate or overlapping accepted shifts
+- Automatic updates to filled-slot counts
+- Automatic closure when staffing capacity is reached
+- Cancellation of accepted bookings before the shift begins
+- Restoration of available capacity when a booking is cancelled
+
+Conditional database updates help protect against multiple workers attempting to claim the same final vacancy.
+
+### 4. Location-Based Attendance Verification
+
+PeakShift includes a check-in workflow intended to improve attendance accountability.
+
+- Browser-based geolocation captures the worker's current coordinates.
+- The server checks whether the worker is within the configured distance of the workplace.
+- Check-in is restricted to the permitted time window.
+- Workers submit a selfie as photographic evidence.
+- Attendance records retain relevant timestamps and location information.
+
+Selfie submission is used as supporting evidence; it should not be interpreted as automated facial recognition or guaranteed liveness detection.
+
+### 5. Trust and Reputation System
+
+PeakShift maintains trust and rating information for workers and businesses.
+
+- Ratings and written reviews
+- Work completion and no-show history
+- Dynamic trust-score recalculation
+- Initial trust-score baseline for new accounts
+- Restrictions on reviews to eligible completed bookings
+- Protection against duplicate reviews for the same booking
+
+This system is designed to encourage accountability and help participants make more informed decisions.
+
+### 6. Automated Shift Lifecycle Management
+
+A background process periodically evaluates shift and booking states.
+
+It supports:
+
+- Expiration of unfilled shifts whose start times have passed
+- Detection of accepted bookings that remain unchecked-in beyond the configured grace period
+- No-show status updates
+- Trust-score adjustments associated with missed shifts
+- Notifications about relevant status changes
+
+These automated transitions reduce the need for manual intervention in routine operations.
+
+### 7. Notifications and Alerts
+
+The notification system keeps participants informed about important events.
+
+Examples include:
+
+- New shift opportunities for nearby workers with matching skills
+- Worker booking confirmations for businesses
+- Check-in updates
+- Shift cancellation or modification alerts
+- Payout-status notifications
+- No-show and other booking lifecycle updates
+- Unread notification counts and notification inbox management
+
+The current implementation uses periodic polling for unread notification counts rather than a persistent WebSocket connection.
+
+### 8. Earnings and Spending Analytics
+
+PeakShift provides financial visibility through application-level ledger records.
+
+**Worker earnings dashboard**
+- Daily, weekly, monthly, and overall earnings summaries
+- Shift-wise earnings history
+- Gross pay and platform-fee breakdowns
+- Net payout calculations
+
+**Business spending dashboard**
+- Aggregate staffing expenditure
+- Platform-fee summaries
+- Worker-wise payout breakdowns
+- Shift-related financial records
+
+The current payout flow is a simulation for demonstrating the workflow. It does not represent a live banking, UPI, or payment-gateway integration.
+
+### 9. Responsive User Interface
+
+The application uses server-rendered EJS views with responsive styling to present:
+
+- Shift listings and detailed shift pages
+- Business dashboards and worker rosters
+- Booking and check-in interfaces
+- Earnings and spending pages
+- Notification interfaces
+- Map-based location information
+
+The interface emphasizes practical shift information, including timing, location, hourly compensation, and staffing capacity.
+
+## 🔄 How It Works
+
+### Business workflow
+
+1. A business creates an account and accesses its business dashboard.
+2. It publishes a shift with role, timing, pay, location, and staffing requirements.
+3. PeakShift makes the opportunity discoverable to eligible workers.
+4. Workers accept available slots.
+5. The business monitors bookings and attendance.
+6. After the shift, the business marks eligible workers as completed.
+7. The application generates the corresponding simulated payout records and updates relevant statistics.
+
+### Worker workflow
+
+1. A worker creates an account and provides relevant profile information.
+2. The worker explores available shifts.
+3. Filters help narrow opportunities by distance, role, skills, timing, and pay.
+4. The worker reserves an available slot.
+5. At the workplace, the worker completes the configured location and selfie check-in process.
+6. The booking progresses through its lifecycle.
+7. The worker can review completed work, earnings records, notifications, and eligible reviews.
+
+## 🏗️ System Architecture
+
+PeakShift follows a modular, server-rendered application architecture built around Node.js, Express, MongoDB, and EJS.
 
 ```mermaid
-graph TD
-    subgraph Client ["Client Layer (Browser / Mobile PWA)"]
-        UI["EJS Responsive Viewport"]
-        GEO["HTML5 Geolocation API"]
-        CAM["Selfie Camera Capture"]
-        POLL["30s Notification Poller"]
+flowchart TB
+    subgraph Client["Client Layer"]
+        UI["Responsive EJS Views"]
+        GEO["Browser Geolocation"]
+        SELFIE["Selfie Capture"]
+        MAP["Leaflet Map"]
     end
 
-    subgraph Server ["Application Server (Node.js & Express 5)"]
-        AUTH["Passport.js Session Auth"]
-        ROUTERS["Modular Route Handlers"]
-        JOI["Joi Validation & IST Time Parser"]
-        GEO_UTIL["Haversine & Nominatim Geo Engine"]
-        TRUST_ENG["Trust & Reputation Engine"]
-        SWEEPER["Periodic Background Sweeper Daemon"]
+    subgraph Server["Application Layer"]
+        APP["Express Application"]
+        AUTH["Authentication & Sessions"]
+        ROUTES["Route Handlers"]
+        VALIDATION["Input Validation"]
+        SERVICES["Business Logic Services"]
+        BACKGROUND["Background Lifecycle Jobs"]
     end
 
-    subgraph Storage ["Data & Media Tier"]
-        MONGO[("MongoDB Atlas (Mongoose 8)")]
-        CLOUDINARY[("Cloudinary CDN (Selfie Storage)")]
+    subgraph Data["Data & Media Layer"]
+        DB[("MongoDB")]
+        ODM["Mongoose Models"]
+        MEDIA["Cloudinary"]
     end
 
-    UI -->|HTTP / REST| ROUTERS
-    GEO -->|Lat / Lng Payload| GEO_UTIL
-    CAM -->|Multipart Form| CLOUDINARY
-    POLL -->|Fetch Unread Count| ROUTERS
-    ROUTERS --> AUTH
-    ROUTERS --> JOI
-    ROUTERS --> MONGO
-    TRUST_ENG --> MONGO
-    SWEEPER -->|5-Min Cron Cycle| MONGO
+    UI --> APP
+    GEO --> ROUTES
+    SELFIE --> ROUTES
+    MAP --> UI
+
+    APP --> AUTH
+    APP --> ROUTES
+    ROUTES --> VALIDATION
+    ROUTES --> SERVICES
+    SERVICES --> ODM
+    ODM --> DB
+    ROUTES --> MEDIA
+    BACKGROUND --> ODM
 ```
 
----
+### Architectural responsibilities
 
-## 🔬 Minute-by-Minute Feature Deep Dive
+| Layer | Responsibility |
+|---|---|
+| Client and views | Render pages, forms, dashboards, maps, and interactive browser features |
+| Routes | Receive HTTP requests and direct them to the appropriate operations |
+| Controllers | Coordinate request handling and application responses |
+| Middleware | Handle authentication, authorization, ownership checks, and request processing |
+| Services | Encapsulate core operations such as booking and related state transitions |
+| Models | Define data structures, relationships, and database interactions |
+| Utilities | Provide reusable validation, geographic calculations, and trust-score logic |
+| Database | Persist users, shifts, bookings, notifications, reviews, and transactions |
+| Media storage | Store uploaded check-in evidence through Cloudinary |
+| Background processing | Evaluate time-dependent shift and booking lifecycle changes |
 
-### 1. Space-Efficient Shift Management (`.shift-row`)
-- **Zero-Image High-Density Telemetry**: Shift management is built without image bloat. By eliminating decorative shift photos, post-shift creation is instant, mobile load times are cut by over 70%, and businesses focus purely on operational parameters.
-- **Micro-Shift Telemetry Cards**:
-  - **Role Badge**: Distinct, uppercase role categorization (`ORDER PACKAGING ASSISTANT`, `KITCHEN PREP`, `CASHIER`, `EVENT CREW`).
-  - **Dynamic Timing Pill**: Relative countdown calculations (`starts in 1h 23m` or `starts in 2d 4h`).
-  - **Hyper-Local Distance Pill**: Live proximity display (`0.1 km away`).
-  - **Staffing Capacity Track**: Visual CSS progress bar visualizing filled vs. needed worker ratios (`0 / 2 filled`, `1 slot left`).
-  - **Rate & Earnings Box**: Real-time hourly rate (`₹145/hr`) and calculated total shift payout (`₹435 total (3 hrs)`).
-- **Contractual Edit-Lock Guarantee**:
-  - Once any worker accepts a slot (`filledCount > 0`), shift title, start time, end time, pay rate, required slot count, and location become **strictly locked and immutable**.
-  - Businesses can only update operational instructions/descriptions, preventing bait-and-switch modifications after workers have accepted.
+The architecture separates routing, business logic, persistence, and reusable utilities to make the application easier to maintain and extend.
 
----
+## 🛠️ Technology Stack
 
-### 2. Hyper-Local Geospatial Discovery Engine
-- **2dsphere Spherical Indexing**: Built directly on `Listing.geometry` (GeoJSON `Point` `[longitude, latitude]`).
-- **Spherical Geometry Queries**: Implements MongoDB `$geoWithin` with `$centerSphere` using exact Earth radian calculations:
-  $$\text{radianRadius} = \frac{\text{radiusInKm}}{6378.1}$$
-- **Haversine Distance Metric**: `utils/geo.js` computes great-circle distance between coordinates with sub-meter precision:
-  $$d = 2R \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)}\right)$$
-- **Instant "Near Me" GPS Radar**:
-  - Browser Geolocation API detects user latitude/longitude.
-  - Automatically falls back to worker's saved profile home location if device permission is denied.
-- **Multi-Facet Search & Injection Defense**:
-  - Text search sanitized with regex escaping (`utils/escapeRegex.js`) to defend against ReDoS and regex injection.
-  - Skill tag array queries, minimum hourly pay filters, and temporal filters (*Next 2 Hours*, *Today*, *Tomorrow* interpreted in IST UTC+05:30).
-  - Multi-tiered radial boundary selectors (2 km, 5 km, 10 km, 20 km) with multi-criteria sorting (*Soonest*, *Nearest*, *Highest Pay*).
+| Technology | Purpose |
+|---|---|
+| Node.js | JavaScript runtime |
+| Express.js 5 | Server-side application and routing |
+| EJS and EJS-Mate | Server-rendered templates and reusable layouts |
+| MongoDB | Persistent application data |
+| Mongoose | Database models and queries |
+| Passport.js | Authentication strategy integration |
+| Express Session | Session-based authentication state |
+| Connect-Mongo | MongoDB-backed session storage |
+| Joi | Request and data validation |
+| Cloudinary | Check-in selfie storage |
+| Multer | Multipart upload handling |
+| Leaflet | Interactive maps |
+| Bootstrap 5 | Responsive interface styling |
+| Geospatial utilities | Distance calculations and location-aware workflows |
+| Helmet | HTTP security headers |
+| Express Rate Limit | Request rate limiting |
+| dotenv | Environment-based configuration |
 
----
+## 📂 Application Structure
 
-### 3. Atomic Slot Concurrency & Oversell Protection
-- **Single-Round-Trip Atomic Increment**:
-  To eliminate race conditions when dozens of workers attempt to claim the last available slot simultaneously, `services/bookingService.js` executes an atomic conditional update:
-  ```javascript
-  const claimedListing = await Listing.findOneAndUpdate(
-    {
-      _id: listingId,
-      status: "open",
-      startAt: { $gt: now },
-      $expr: { $lt: ["$filledCount", "$workersNeeded"] },
-    },
-    { $inc: { filledCount: 1 } },
-    { new: true }
-  );
-  ```
-- **Auto-Closing Threshold**: Automatically sets status to `"filled"` when `filledCount >= workersNeeded`.
-- **Double-Booking & Overlap Defense**: Prior to booking, the system queries for any existing `"accepted"` bookings overlapping the time window:
-  ```javascript
-  const overlap = await Booking.findOne({
-    worker: workerId,
-    status: "accepted",
-    startAt: { $lt: listing.endAt },
-    endAt: { $gt: listing.startAt },
-  });
-  ```
-- **Compensating Rollback Transaction**: If downstream booking document creation fails, an atomic rollback decrements `filledCount` and restores open availability.
-- **Worker Cancellation with Slot Restoration**: Workers can safely cancel before `startAt`, which decrements `filledCount` and reopens the shift.
+```text
+PeakShift/
+├── config/          # Application and service configuration
+├── controllers/     # Request handling and application workflows
+├── init/            # Database initialization and seed scripts
+├── models/          # Mongoose schemas and data models
+├── public/          # Static assets, stylesheets, and client-side scripts
+├── routes/          # Application route definitions
+├── services/        # Core business logic and reusable operations
+├── utils/            # Validation and utility functions
+├── views/           # EJS templates and page layouts
+├── app.js            # Application entry point
+├── cloudConfig.js    # Cloudinary integration configuration
+├── middleware.js     # Shared authentication and request middleware
+├── schema.js         # Validation schema definitions
+├── package.json      # Dependencies and npm scripts
+└── README.md
+```
 
----
+## 🗄️ Database Design
 
-### 4. Proof-of-Presence Geofenced Check-In
-- **Dual-Constraint Verification Window**:
-  - **Temporal Guard**: Check-in window opens strictly `CHECKIN_OPENS_MIN_BEFORE` minutes (default 30 mins) before `startAt` and closes at `endAt`.
-  - **Spatial Guard**: Live device coordinates must fall within `CHECKIN_RADIUS_M` meters (default 300m) of the verified shift location.
-- **Live Facial Selfie Photographic Proof**:
-  - Workers capture a live selfie via browser camera input, processed via Multer directly to Cloudinary storage.
-  - Prevents remote check-ins, spoofing, and ghost worker attendance.
-- **Audit-Trail Logging**: Every check-in logs exact check-in timestamp (`checkInAt`), geographic coordinates (`checkInCoords`), calculated distance in meters (`checkInDistanceM`), and selfie thumbnail URL.
+The application uses MongoDB collections represented by Mongoose models.
 
----
+| Entity | Purpose |
+|---|---|
+| User | Stores account information, role, skills, location, and reputation data |
+| Listing | Represents a shift posted by a business |
+| Booking | Connects a worker to a shift and tracks booking and attendance status |
+| Notification | Stores user notifications and read status |
+| Review | Records eligible ratings and feedback between participants |
+| Transaction | Stores simulated payout and platform-fee records |
 
-### 5. Dual-Sided Mathematical Trust & Reputation Engine
-- **Formula-Driven Score Calculation** (`utils/trust.js`):
-  Both workers and businesses operate with an algorithmic Trust Score from 0 to 100:
-  $$\text{trustScore} = \text{round}\left(100 \times \left(0.6 \times \frac{\text{completedShifts}}{\text{completedShifts} + \text{noShows}} + 0.4 \times \frac{\text{ratingAvg}}{5}\right)\right)$$
-- **Cold-Start Foundation**: New accounts start at an equitable baseline score of **70**.
-- **Real-Time Dynamic Recalculation**:
-  - Recomputed immediately when a shift is marked `completed`.
-  - Penalized immediately when an unattended booking transitions to `no_show`.
-  - Recalculated immediately upon submission of a verified 1–5 star review.
-- **Contract-Restricted Reviews**: Reviews (`models/review.js`) can only be authored between the verified worker and business of a `completed` shift booking, with exactly one immutable review permitted per participant per shift.
+### Core relationships
 
----
+- A business user can create multiple shift listings.
+- A listing can have multiple worker bookings.
+- A worker can have multiple bookings across different shifts.
+- Bookings can generate corresponding transaction records.
+- Completed bookings can support eligible reviews.
+- Users can receive multiple notifications.
 
-### 6. Autonomous Background Sweeper Daemon
-- **Continuous Lifecycle Watchdog** (`app.js`): Runs an automatic sweep every 5 minutes:
-  1. **Shift Expiration**: Unstaffed open shifts whose `startAt` timestamp has passed are automatically transitioned from `open` to `expired`.
-  2. **Automated No-Show Detection**: Bookings remaining in `accepted` status 30 minutes after `startAt` with no check-in logged are automatically converted to `no_show`.
-  3. **Automated Penalty & Alert**: Instantly triggers Trust Score penalty recalculation for the absent worker and sends a real-time notification alert.
+### Data integrity considerations
 
----
+The application uses conditional updates to manage shift capacity and prevent overbooking. Booking overlap checks help avoid conflicting accepted shifts, while transaction uniqueness constraints help prevent duplicate ledger entries for the same booking.
 
-### 7. Escrow-Style Financial Ledger & Simulated Payouts
-- **Idempotent Payout Engine**:
-  - Business owners can mark workers completed individually or via **"Complete All (Simulated Payout)"**.
-  - Enforces `unique: true` constraint on `transactionSchema.booking`, guaranteeing that accidental double-clicks or concurrent network retries can never produce duplicate payout deductions.
-- **Automated Platform Fee Deductions**:
-  - Gross pay calculated based on verified shift duration:
-    $$\text{gross} = \text{hours} \times \text{hourlyRate}$$
-  - Platform fee computed at 10% (`PLATFORM_FEE_RATE = 0.10`).
-  - Net payout allocated to worker:
-    $$\text{workerNet} = \text{gross} - \text{platformFee}$$
-- **Worker Work Passport & Payout Ledger** (`/earnings`):
-  - Real-time aggregated financial analytics: Today's Gross/Net, Weekly Gross/Net, Monthly Gross/Net, and All-Time Payouts.
-  - Tabular historical ledger showing date (IST), shift title, employer, gross, platform fee deduction, and net disbursement.
-- **Business Shift Spend Analytics** (`/spend`):
-  - Full spend visibility showing total staffing outlays, platform charges, and worker-by-worker payout breakdowns.
+Geospatial fields support location-aware queries where configured.
 
----
+## ⚙️ Core Workflows
 
-### 8. Proactive Hyper-Local Dispatch & Real-Time Alerts
-- **Proactive Geographic Dispatch**:
-  - When a business posts a new shift, the system queries the database for workers within a 5 km radius sharing matching skill tags.
-  - Dispatches automated in-app notifications to up to 20 nearby matching workers within seconds of posting.
-- **Event-Driven Notification Pipeline**:
-  - Worker accepts shift ➔ Business alerted with applicant name and roster link.
-  - Worker checks in on-site ➔ Business alerted with check-in timestamp and selfie status.
-  - Shift cancelled or details updated ➔ All booked workers alerted immediately.
-  - Payout released ➔ Worker alerted with net payout amount.
-- **Asynchronous Navbar Telemetry**:
-  - Navbar bell counter polls `/notifications/unread-count` every 30 seconds.
-  - Real-time counter badge with instant mark-all-read capabilities.
-
----
-
-### 9. Privacy, Security & Data Protection
-- **Zero Demo Leaks**: No personal emails, passwords, or hardcoded dummy credentials exposed anywhere in user-facing views or placeholders.
-- **Role-Based Access Control (RBAC)**: Comprehensive middleware suite (`isLoggedIn`, `isBusiness`, `isWorker`, `isOwner`) guarding every endpoint.
-- **Strict Input Validation**: Joi schemas enforce start times in future IST, valid temporal windows (1 to 12 hours), positive wages, and strict enum checking.
-
----
-
-## 🗄️ Database Schemas & Data Model
+### Booking lifecycle
 
 ```mermaid
-erDiagram
-    USER ||--o{ LISTING : owns
-    USER ||--o{ BOOKING : accepts
-    USER ||--o{ NOTIFICATION : receives
-    USER ||--o{ REVIEW : authors
-    USER ||--o{ REVIEW : receives
-    LISTING ||--o{ BOOKING : contains
-    BOOKING ||--o| TRANSACTION : generates
-    BOOKING ||--o{ REVIEW : references
-
-    USER {
-        ObjectId _id PK
-        string username
-        string email
-        string role "worker | business"
-        string businessName
-        string[] skills
-        Point geometry "2dsphere"
-        number trustScore "0-100"
-        number ratingAvg "0-5"
-        number ratingCount
-        number completedShifts
-        number noShows
-    }
-
-    LISTING {
-        ObjectId _id PK
-        string title
-        string description
-        number price "hourly"
-        string roleType
-        number workersNeeded
-        number filledCount
-        string status "open | filled | cancelled | expired"
-        Date startAt
-        Date endAt
-        string[] skillTags
-        string location
-        Point geometry "2dsphere"
-        ObjectId owner FK
-    }
-
-    BOOKING {
-        ObjectId _id PK
-        ObjectId listing FK
-        ObjectId worker FK
-        Date startAt
-        Date endAt
-        number hours
-        number payAmount
-        number platformFee
-        string status "accepted | checked_in | completed | no_show | cancelled"
-        Date checkInAt
-        Object checkInCoords
-        number checkInDistanceM
-        Object checkInSelfie
-    }
-
-    TRANSACTION {
-        ObjectId _id PK
-        ObjectId booking FK "unique"
-        ObjectId worker FK
-        ObjectId business FK
-        number gross
-        number platformFee
-        number workerNet
-        Date createdAt
-    }
-
-    REVIEW {
-        ObjectId _id PK
-        ObjectId booking FK
-        ObjectId author FK
-        ObjectId reviewee FK
-        number rating "1-5"
-        string comment
-        Date createdAt
-    }
-
-    NOTIFICATION {
-        ObjectId _id PK
-        ObjectId user FK
-        string message
-        string link
-        boolean read
-        Date createdAt
-    }
+flowchart TD
+    A["Worker selects a shift"] --> B{"Shift open and capacity available?"}
+    B -- No --> C["Reject booking"]
+    B -- Yes --> D{"Overlapping accepted shift?"}
+    D -- Yes --> E["Reject conflicting booking"]
+    D -- No --> F["Reserve slot"]
+    F --> G["Create booking"]
+    G --> H["Worker checks in"]
+    H --> I{"Check-in valid?"}
+    I -- No --> J["Reject check-in"]
+    I -- Yes --> K["Record attendance evidence"]
+    K --> L["Business completes booking"]
+    L --> M["Create simulated payout record"]
 ```
 
----
+### Shift lifecycle
 
-## 🛣️ API Endpoint Directory
+A shift may progress from open to filled, cancelled, or expired depending on staffing capacity, cancellation actions, and time-based lifecycle rules.
 
-| Method | Endpoint | Access Control | Functional Purpose |
-|---|---|---|---|
-| `GET` | `/` | Public | Landing page with platform metrics & active shift rows |
-| `GET` | `/listings` | Public | Paginated search, radius filtering & spatial discovery |
-| `POST` | `/listings` | Business | Post a new shift without image dependencies |
-| `GET` | `/listings/:id` | Public | High-density shift detail page with Leaflet map |
-| `PUT` | `/listings/:id` | Business (Owner) | Update shift (subject to contract edit lock) |
-| `POST` | `/listings/:id/cancel` | Business (Owner) | Cancel shift and cancel accepted worker slots |
-| `POST` | `/listings/:id/bookings` | Worker | Atomic shift acceptance with overlap checking |
-| `GET` | `/bookings/my` | Worker | Worker Shift Passport & check-in hub |
-| `POST` | `/bookings/:id/checkin`| Worker | Geofenced GPS + selfie check-in submission |
-| `DELETE`| `/bookings/:id` | Worker | Cancel accepted slot prior to shift start |
-| `GET` | `/dashboard` | Business | Real-time shift roster with worker verification details |
-| `POST` | `/bookings/:id/complete`| Business (Owner) | Mark worker completed & trigger simulated payout |
-| `POST` | `/listings/:id/complete-all`| Business (Owner) | Batch complete all checked-in workers |
-| `POST` | `/bookings/:id/reviews`| Worker / Business| Submit 1–5 star review and recalculate trust score |
-| `GET` | `/earnings` | Worker | Financial ledger with net earnings breakdown |
-| `GET` | `/spend` | Business | Aggregate spend ledger & platform fee reporting |
-| `GET` | `/notifications` | Authenticated | Notification inbox with mark-all-read action |
-| `GET` | `/notifications/unread-count`| Authenticated | Real-time unread badge count for navbar polling |
+Booking states track the worker's progress, including accepted, checked-in, completed, cancelled, or no-show states where applicable.
 
----
+The application treats shift status and booking status as separate concepts so that a shift can contain multiple workers whose bookings progress independently.
 
-## 🚀 Setup & Local Execution Guide
+## 🔐 Security and Reliability
 
-### Prerequisites
-- Node.js v18+ or v20+
-- MongoDB Atlas cluster or local MongoDB instance (v6.0+)
-- Cloudinary account credentials (for worker check-in selfie uploads)
+PeakShift incorporates several application-level safeguards:
 
-### 1. Installation
-```bash
-# Clone the repository
-git clone https://github.com/bhav-1007/PeakShift.git
-cd PeakShift
+- **Authentication:** Session-based authentication using Passport.js.
+- **Role-based authorization:** Worker and business access restrictions.
+- **Ownership validation:** Business operations are restricted to authorized owners of relevant shifts.
+- **Input validation:** Joi schemas validate supported request fields and constraints.
+- **Booking integrity:** Conditional capacity updates and overlapping-shift checks.
+- **Transaction integrity:** Unique booking references for payout records.
+- **Request protection:** Security middleware and rate-limiting dependencies.
+- **Session persistence:** MongoDB-backed session storage.
+- **Safer search handling:** User search terms are escaped where used in regular-expression matching.
 
-# Install all dependencies
-npm install
-```
+Security controls should be reviewed and tested as part of deployment. In particular, production deployments need secure cookie configuration, correct CSRF protection, secret management, and appropriate handling of sensitive location and selfie data.
 
 
-### 3. Seed Database
-```bash
-# Seed deterministic test accounts and shift opportunities
-npm run seed
-```
+## 👨‍💻 Project
 
-### 4. Run Development Server
-```bash
-npm run dev
-```
-Access the application at: **[http://127.0.0.1:8080](http://127.0.0.1:8080)**
+**PeakShift — Making Labor as Flexible as Work Itself**
 
----
+Repository: [github.com/bhav-1007/PeakShift](https://github.com/bhav-1007/PeakShift)
 
-## ⚖️ Known Limitations & Future Roadmap
-
-- **Simulated Payout Disbursements**: Payout ledgering and platform deductions are functional demonstration simulations. Real-world commercial production will connect UPI AutoPay and Razorpay Route escrow payouts.
-- **Real-Time WebSockets**: Notifications currently poll at 30-second intervals; future iterations will implement Socket.io for sub-second bi-directional dispatch updates.
-- **EXIF & Facial Liveness AI**: Check-in selfies currently verify photographic submission; future enhancements will integrate AWS Rekognition for facial liveness and anti-spoofing detection.
-
----
+Built to explore how software can make temporary staffing more accessible, location-aware, and accountable for both businesses and workers.
