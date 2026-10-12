@@ -1,26 +1,48 @@
-const mongoose = require('mongoose');
-const initData = require('./data.js');
-const Listing = require('../models/listing.js');
-
-main()
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/PeakShift');
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
 }
+
+const mongoose = require("mongoose");
+const initData = require("./data.js");
+const Listing = require("../models/listing.js");
+const User = require("../models/user.js");
+
+const dbUrl = process.env.ATLAS_URL || "mongodb://127.0.0.1:27017/PeakShift";
 
 const initDB = async () => {
   await Listing.deleteMany({});
-  initData.data = initData.data.map((obj) => ({...obj, owner: "6a5c72f483e29a1f2149388d"}));
-  await Listing.insertMany(initData.data);
-  console.log('Data was initialized');
+
+  // Find existing demo business user or create one
+  let demoUser = await User.findOne({ username: "demobusiness" });
+  if (!demoUser) {
+    demoUser = await User.register(
+      new User({ username: "demobusiness", email: "business@peakshift.demo" }),
+      "demopassword123"
+    );
+  }
+
+  const listings = initData.data.map((obj) => ({
+    ...obj,
+    owner: demoUser._id,
+  }));
+  await Listing.insertMany(listings);
+  console.log("Data was initialized");
 };
 
-initDB();
+// Only execute when run directly via CLI (e.g. `npm run seed`)
+if (require.main === module) {
+  mongoose
+    .connect(dbUrl)
+    .then(async () => {
+      console.log("Connected to MongoDB for seeding");
+      await initDB();
+      await mongoose.disconnect();
+      console.log("Database seeded successfully");
+    })
+    .catch((err) => {
+      console.error("Seeding error:", err);
+      process.exit(1);
+    });
+}
 
 module.exports = initDB;
